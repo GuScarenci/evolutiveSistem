@@ -1,7 +1,7 @@
 import numpy as np
 
 # Neural Network Class
-class NeuralNetwork:
+class Perceptron:
     def __init__(self, input_size, hidden_size, output_size):
         """
         Initialize a perceptron object.
@@ -35,13 +35,13 @@ class NeuralNetwork:
         Crossover two perceptrons' genes to get another perceptron.
 
         Args:
-            parent1 (NeuralNetwork): first parent.
-            parent2 (NeuralNetwork): second parent.
+            parent1 (Perceptron): first parent.
+            parent2 (Perceptron): second parent.
         
         Returns:
-            NeuralNetwork: the crossover between the two parents.
+            Perceptron: the crossover between the two parents.
         """
-        child = NeuralNetwork(input_size=4, hidden_size=6, output_size=2)
+        child = Perceptron(input_size=4, hidden_size=6, output_size=2)
         child.input_to_hidden = (parent1.input_to_hidden + parent2.input_to_hidden) / 2
         child.hidden_to_output = (parent1.hidden_to_output + parent2.hidden_to_output) / 2
         return child
