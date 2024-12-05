@@ -24,7 +24,7 @@ car_img  = pygame.transform.scale(car_img, (30, 30))
 
 
 class Car:
-    def __init__(self, checkpoint_, checkpoints, angle=90, 
+    def __init__(self, checkpoint_, checkpoints, angle=-90, 
                  speed=0, car_img=car_img, color=BLUE):
         self.start_checkpoint = checkpoint_ - 1 if checkpoint_ is not None else None
         self.checkpoints = checkpoints
@@ -38,8 +38,8 @@ class Car:
         self.acceleration = 0.05
         self.deceleration = 0.1
         self.hitbox = (25, 20)
-        self.max_ray_length = 300
-        self.max_frames_to_reach_checkpoint = 60
+        self.max_ray_length = 110
+        self.max_frames_to_reach_checkpoint = 100
         self.ray_angles = [-90, -45, 0, 45, 90, 180]
 
         self.max_score = 0

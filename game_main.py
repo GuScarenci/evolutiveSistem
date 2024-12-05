@@ -15,9 +15,16 @@ clock = pygame.time.Clock()
 FPS = 60
 running = True
 
-playerCar = Car(64, checkpoints)
+playerCar = Car(102, checkpoints)
+aiCar = Car(102, checkpoints, color=RED)
+aiPerceptron = Perceptron(input_size=6, hidden_size=6, output_size=2)
+aiPerceptron.load_perceptron("best_perceptron.json.npz")
 
 while running:
+    #hardcoded way to keep it always running
+    aiCar.running = True
+    playerCar.running = True
+
     screen.fill(BLACK)
     screen.blit(path_img, (0, 0))
 
@@ -32,6 +39,12 @@ while running:
     turn = -1 if keys[pygame.K_a] else 1 if keys[pygame.K_d] else 0
     accel = -1 if keys[pygame.K_s] else 1 if keys[pygame.K_w] else 0
     playerCar.update(turn, accel)
+
+    inputs = np.array(aiCar.ray_distances)
+    if inputs.max() <= 0:
+        inputs = np.ones_like(inputs) * -1
+    turn, accel = aiPerceptron.forward(inputs)
+    aiCar.update(turn=int(np.sign(turn)), accel=int(np.sign(accel)))
 
     #write player current score in the top left
     font = pygame.font.Font(None, 36)

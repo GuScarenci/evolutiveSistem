@@ -116,6 +116,14 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_s]:
+        #get best perceptron from population
+        best_perceptron = max(population, key=lambda ind: ind["car"].fitness)["perceptron"]
+        best_perceptron.save_perceptron("best_perceptron.json")
+        print("Best perceptron saved to best_perceptron.json")
+        break
+
     # Evaluate the population
     evaluate_population()
     

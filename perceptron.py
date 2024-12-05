@@ -15,6 +15,31 @@ class Perceptron:
         self.hidden_bias = np.zeros(hidden_size)
         self.output_bias = np.zeros(output_size)
 
+    def load_perceptron(self, filename):
+        """
+        Load the perceptron's weights and biases from a file.
+
+        Args:
+            filename (str): Name of the file to load the perceptron.
+        """
+        data = np.load(filename)
+        self.input_to_hidden = data["input_to_hidden"]
+        self.hidden_to_output = data["hidden_to_output"]
+        self.hidden_bias = data["hidden_bias"]
+        self.output_bias = data["output_bias"]
+
+    def save_perceptron(self, filename):
+        """
+        Save the perceptron's weights and biases to a file.
+
+        Args:
+            filename (str): Name of the file to save the perceptron.
+        """
+        np.savez(filename, input_to_hidden=self.input_to_hidden, 
+                           hidden_to_output=self.hidden_to_output, 
+                           hidden_bias=self.hidden_bias, 
+                           output_bias=self.output_bias)
+
     def forward(self, inputs):
         """
         Perform a forward pass through the perceptron.
