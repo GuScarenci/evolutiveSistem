@@ -128,9 +128,7 @@ while running:
     evaluate_population()
     
     # Check if all cars have stopped running
-    if all(not individual["car"].running for individual in population) or \
-    any(individual["car"].fitness >= 200000 for individual in population):
-
+    if all(not individual["car"].running for individual in population):
         if generation % BREED_EVERY == 0:
             breed_population()
         else:
