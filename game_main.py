@@ -16,7 +16,6 @@ FPS = 60
 running = True
 
 playerCar = Car(64, checkpoints)
-cars = [Car(27, checkpoints, color=RED), Car(28, checkpoints, color=GREEN)]
 
 while running:
     screen.fill(BLACK)
@@ -33,9 +32,6 @@ while running:
     turn = -1 if keys[pygame.K_a] else 1 if keys[pygame.K_d] else 0
     accel = -1 if keys[pygame.K_s] else 1 if keys[pygame.K_w] else 0
     playerCar.update(turn, accel)
-
-    for car in cars:
-        car.update(random.randint(-1, 1), random.randint(-1, 1))
 
     #write player current score in the top left
     font = pygame.font.Font(None, 36)
