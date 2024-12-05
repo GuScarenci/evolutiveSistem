@@ -17,7 +17,7 @@ FPS = 60
 # Genetic algorithm parameters
 POPULATION_SIZE = 20
 MUTATION_RATE = 0.1
-GENERATIONS = 100
+GENERATIONS = 1000
 
 # Initialize game
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -28,7 +28,7 @@ running = True
 population = [
     {
         "perceptron": Perceptron(input_size=6, hidden_size=6, output_size=2),
-        "car": Car(random.randint(1, len(checkpoints)), checkpoints, color=random.choice([RED, GREEN, BLUE]))
+        "car": Car(None, checkpoints, color=random.choice([RED, GREEN, BLUE]))
     }
     for _ in range(POPULATION_SIZE)
 ]
@@ -92,14 +92,14 @@ def breed_population():
             child_perceptron.mutate(MUTATION_RATE)
             new_population.append({
                 "perceptron": child_perceptron,
-                "car": Car(random.randint(1, len(checkpoints)), checkpoints, color=random.choice([RED, GREEN, BLUE]))
+                "car": Car(None, checkpoints, color=random.choice([RED, GREEN, BLUE]))
             })
 
     # Add 5 new random individuals
     while len(new_population) < POPULATION_SIZE:
         new_population.append({
             "perceptron": Perceptron(input_size=6, hidden_size=6, output_size=2),
-            "car": Car(random.randint(1, len(checkpoints)), checkpoints, color=random.choice([RED, GREEN, BLUE]))
+            "car": Car(None, checkpoints, color=random.choice([RED, GREEN, BLUE]))
         })
 
     population = new_population

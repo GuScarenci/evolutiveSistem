@@ -2,6 +2,7 @@ import pygame
 import math
 import numpy as np
 import cv2
+import random
 from perceptron import *
 
 # Screen dimensions
@@ -25,10 +26,7 @@ car_img  = pygame.transform.scale(car_img, (30, 30))
 class Car:
     def __init__(self, checkpoint_, checkpoints, angle=90, 
                  speed=0, car_img=car_img, color=BLUE):
-        self.start_checkpoint = checkpoint_ - 1
-        checkpoint = checkpoints[self.start_checkpoint]["rectangle"]
-        self.start_X = sum(x for x, y in checkpoint) / 4
-        self.start_Y = sum(y for x, y in checkpoint) / 4
+        self.start_checkpoint = checkpoint_ - 1 if checkpoint_ is not None else None
         self.checkpoints = checkpoints
         self.start_angle = angle
         self.start_speed = speed
@@ -51,11 +49,13 @@ class Car:
         self.reset()
 
     def reset(self):
-        self.x = self.start_X
-        self.y = self.start_Y
+        start_checkpoint = self.start_checkpoint if self.start_checkpoint is not None else random.randint(0, len(self.checkpoints) - 1)
+        checkpoint = self.checkpoints[start_checkpoint]["rectangle"]
+        self.x = sum(x for x, y in checkpoint) / 4
+        self.y = sum(y for x, y in checkpoint) / 4
         self.angle = self.start_angle
         self.speed = self.start_speed
-        self.next_checkpoint = self.start_checkpoint + 1
+        self.next_checkpoint = start_checkpoint + 1
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
         self.fitness = 0
@@ -194,7 +194,7 @@ class Car:
         Creates a deep copy of the Car instance.
         """
         new_car = Car(
-            checkpoint_=self.start_checkpoint + 1,
+            checkpoint_=self.start_checkpoint,
             checkpoints=self.checkpoints,
             angle=self.start_angle,
             speed=self.start_speed,
