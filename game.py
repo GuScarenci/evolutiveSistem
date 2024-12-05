@@ -26,16 +26,15 @@ path_img = pygame.transform.scale(path_img, (WIDTH, HEIGHT))  # Scale to fit scr
 
 class Car:
     def __init__(self, checkpoint_, checkpoints, angle=90, speed=0, car_img='car.png', color=BLUE):
-        checkpoint = checkpoints[checkpoint_-1]["rectangle"]
+        self.start_checkpoint = checkpoint_ -1
+        checkpoint = checkpoints[self.start_checkpoint]["rectangle"]
+        self.start_X = sum(x for x, y in checkpoint) / 4
+        self.start_Y = sum(y for x, y in checkpoint) / 4
         self.checkpoints = checkpoints
-        x = sum(x for x, y in checkpoint) / 4
-        y = sum(y for x, y in checkpoint) / 4
-        self.start_X = x
-        self.start_Y = y
         self.start_angle = angle
         self.start_speed = speed
+        self.image = pygame.image.load(car_img)  # Replace with your car image
 
-        self.max_frames_to_reach_checkpoint = 300
         self.rotation_speed = 2
         self.max_speed = 5
         self.acceleration = 0.05
@@ -43,7 +42,6 @@ class Car:
         self.hitbox = (25, 20)
         self.max_ray_length = 300
         self.ray_angles = [-90, -45, 0, 45, 90, 180]
-        self.image = pygame.image.load(car_img)  # Replace with your car image
         self.image = pygame.transform.scale(self.image, (30, 30))  # Resize car
 
         self.color = color
@@ -55,7 +53,9 @@ class Car:
         self.y = self.start_Y
         self.angle = self.start_angle
         self.speed = self.start_speed
+        self.next_checkpoint = self.start_checkpoint+1
         self.checkpoints_reached = 0
+        self.max_frames_to_reach_checkpoint = 300
         self.frames_since_last_checkpoint = 0
         self.rect = self.image.get_rect(center=(self.x, self.y))
         self.ray_distances = [0] * len(self.ray_angles)
@@ -154,39 +154,3 @@ class Car:
             self.ray_distances.append(distance)
             # Visualize the ray
             pygame.draw.line(screen, self.color, (self.x, self.y), (ray_x, ray_y), 1)
-
-
-def evolve_population():
-
-    # Pair each neural network with its score
-    scored_population = list(zip(scores, population))
-    # Sort by score in descending order
-    scored_population.sort(key=lambda pair: pair[0], reverse=True)
-    # Extract the top half of the population (the best performing networks)
-    survivors = [pair[1] for pair in scored_population[:POPULATION_SIZE // 2]]
-
-    # Reproduce new population with mutations
-    new_population = []
-    for _ in range(POPULATION_SIZE):
-        parent1, parent2 = random.choices(survivors, k=2)  # Select two parents
-        child = crossover(parent1, parent2)  # Combine parents' weights
-        mutate(child)  # Mutate child
-        new_population.append(child)
-    population = new_population
-    scores = [0] * POPULATION_SIZE  # Reset scores for new generation
-
-# Sensor data simulation
-def get_sensor_data(car_x, car_y, car_angle):
-    distances = []
-    for angle_offset in [-45, 0, 45]:
-        angle = math.radians(car_angle + angle_offset)
-        for distance in range(1, 300):
-            x = int(car_x + distance * math.cos(angle))
-            y = int(car_y + distance * math.sin(angle))
-            if 0 <= x < WIDTH and 0 <= y < HEIGHT and path_img.get_at((x, y)) != WHITE:
-                distances.append(distance)
-                break
-        else:
-            distances.append(300)
-    return distances
-
