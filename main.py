@@ -52,6 +52,13 @@ checkpoints_reached = 0
 max_frames_to_reach_checkpoint = 300
 frames_since_last_checkpoint = 0
 
+# Genetic Algorithm parameters
+#POPULATION_SIZE = 5
+#MUTATION_RATE = 0.1
+#population = [NeuralNetwork(input_size=4, hidden_size=6, output_size=2) for _ in range(POPULATION_SIZE)]
+#scores = [0] * POPULATION_SIZE
+#current_ai = 0
+
 # Initialize Pygame
 pygame.init()
 
