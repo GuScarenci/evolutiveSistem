@@ -1,8 +1,7 @@
 import pygame
-import sys
 import math
 import numpy as np
-import random
+import cv2
 from perceptron import *
 
 # Screen dimensions
@@ -41,6 +40,7 @@ class Car:
         self.deceleration = 0.1
         self.hitbox = (25, 20)
         self.max_ray_length = 300
+        self.max_frames_to_reach_checkpoint = 300
         self.ray_angles = [-90, -45, 0, 45, 90, 180]
         self.image = pygame.transform.scale(self.image, (30, 30))  # Resize car
 
@@ -54,11 +54,14 @@ class Car:
         self.angle = self.start_angle
         self.speed = self.start_speed
         self.next_checkpoint = self.start_checkpoint+1
-        self.checkpoints_reached = 0
-        self.max_frames_to_reach_checkpoint = 300
-        self.frames_since_last_checkpoint = 0
         self.rect = self.image.get_rect(center=(self.x, self.y))
+
+        self.fitness = 0
+        self.time_alive = 0
+        self.checkpoints_reached = 0
+        self.frames_since_last_checkpoint = 0
         self.ray_distances = [0] * len(self.ray_angles)
+
         self.running = True
 
     def update(self, turn=0, accel=0):
@@ -98,8 +101,21 @@ class Car:
         self.draw()
         self.cast_rays()
 
+        self.is_on_checkpoint()
+
+        self.frames_since_last_checkpoint += 1
+        self.time_alive += 1
+
+        self.fitness = self.checkpoints_reached * 1000 + self.time_alive
+
         if not self.is_on_path():
             self.running = False
+            return
+        
+        timeout = self.frames_since_last_checkpoint > self.max_frames_to_reach_checkpoint
+        if timeout:
+            self.running = False
+            return
 
 
     def draw(self):
@@ -125,6 +141,24 @@ class Car:
                     return False
         return True
     
+    def is_on_checkpoint(self):
+        points = [self.rect.topleft, self.rect.topright, self.rect.bottomleft, self.rect.bottomright]
+
+        for point in points:
+            rectangle = self.checkpoints[self.next_checkpoint]["rectangle"]
+            rect_points = np.array(rectangle, dtype=np.int32)
+            inside = cv2.pointPolygonTest(rect_points, point, False)
+
+            if inside >= 0:
+                self.frames_since_last_checkpoint = 0
+                self.checkpoints_reached += 1
+                self.next_checkpoint += 1
+                if self.next_checkpoint >= len(self.checkpoints):
+                    self.next_checkpoint = 0
+
+                #show checkpoint reached
+                pygame.draw.polygon(screen, self.color, rect_points, 15)
+
     def cast_rays(self):
         """
         Casts rays in predefined directions and calculates the distance to the nearest non-white pixel.
