@@ -7,15 +7,15 @@ from game import *
 from perceptron import Perceptron
 
 # Genetic Algorithm HYPERPARAMETERS
-POPULATION_SIZE = 20
+POPULATION_SIZE = 50
 MUTATION_RATE = 0.1
-MUTATION_MODULUS = 0.5
+MUTATION_MODULUS = 1
 GENERATIONS = 1000
 BREEDING_NUM = 5
-TOP_SCORES_TO_CONSERVE = 7
+TOP_SCORES_TO_CONSERVE = 35
 BREED_EVERY = 5
-HIDDEN_LAYER_SIZE = 6
-CHECKPOINT = 0
+HIDDEN_LAYER_SIZE = 8
+CHECKPOINT = 102
 
 # Load checkpoints
 with open("checkpoints.json", "r") as file:
@@ -63,16 +63,13 @@ def evaluate_population():
 
 def mutate_population():
     """Mutate the population and rollback if fitness decreases."""
-    for individual in population:
-        individual["perceptron"].mutate(MUTATION_RATE, MUTATION_MODULUS)
-
-    # Reevaluate fitness after mutation
-    evaluate_population()
-
-    # Rollback if fitness is worse
     for i in range(len(population)):
         if population[i]["car"].fitness < previous_population[i]["car"].fitness:
             population[i] = previous_population[i]
+        else:
+            previous_population[i] = population[i]
+
+        population[i]['perceptron'].mutate(MUTATION_RATE, MUTATION_MODULUS)
 
 def breed_population():
     """Select the top 5 fittest individuals and create the next generation."""
@@ -105,7 +102,7 @@ def breed_population():
         })
 
     population = new_population
-    
+
 
 previous_generation_best_fitness = 0
 best_fitness = 0
