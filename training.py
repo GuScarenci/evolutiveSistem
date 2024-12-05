@@ -16,6 +16,7 @@ TOP_SCORES_TO_CONSERVE = 35
 BREED_EVERY = 3
 HIDDEN_LAYER_SIZE = 8
 CHECKPOINT = 102
+GENERATIONS_TO_DECIMATE = 3 * BREED_EVERY - 1
 
 # Load checkpoints
 with open("checkpoints.json", "r") as file:
@@ -51,7 +52,6 @@ generation = 1
 
 goldPerceptron = Perceptron(input_size=6, hidden_size=6, output_size=2)
 goldPerceptron.load_perceptron("safe_perceptron.npz")
-
 population[0]["perceptron"] = goldPerceptron
 
 def evaluate_population():
@@ -101,7 +101,7 @@ def breed_population():
         # Perform crossover between the best individual and the random individual
         child_perceptron = Perceptron.crossover(best_perceptron, individual['perceptron'])
 
-        if generations_since_new_best > 5:
+        if generations_since_new_best > GENERATIONS_TO_DECIMATE:
             child_perceptron = Perceptron(input_size=6, hidden_size=HIDDEN_LAYER_SIZE, output_size=2)
         
         # Optionally, you can mutate the child perceptron to maintain genetic diversity
@@ -113,7 +113,7 @@ def breed_population():
             "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, BLUE]))
         })
 
-    if generations_since_new_best > 9:
+    if generations_since_new_best > GENERATIONS_TO_DECIMATE:
         print("DECIMATED")
         generations_since_new_best = 0
 
@@ -122,6 +122,7 @@ def breed_population():
 previous_generation_best_fitness = 0
 best_fitness = 0
 generations_since_new_best = 0
+best_perceptron = None
 
 trackColored  = pygame.image.load("trackColored.png")
 trackColored  = pygame.transform.scale(trackColored, (1920, 1080))
@@ -136,8 +137,6 @@ while running:
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_s]:
-        #get best perceptron from population
-        best_perceptron = max(population, key=lambda ind: ind["car"].fitness)["perceptron"]
         file_name = f"perceptron_{generation}.json"
         best_perceptron.save_perceptron(file_name)
         print(f"Best perceptron saved to {file_name}")
@@ -147,12 +146,15 @@ while running:
     
     # Check if all cars have stopped running
     if all(not individual["car"].running for individual in population):
-        previous_generation_best_fitness = max(individual["car"].fitness for individual in population)
+        best_individual = max(population, key=lambda ind: ind["car"].fitness)
+        previous_generation_best_fitness = best_individual["car"].fitness
         best_fitness = max(best_fitness, previous_generation_best_fitness)
         generations_since_new_best += 1
         
         if previous_generation_best_fitness == best_fitness:
             generations_since_new_best = 0
+            best_perceptron = best_individual["perceptron"]
+
         if generation % BREED_EVERY == 0:
             breed_population()
         else:
