@@ -12,8 +12,8 @@ MUTATION_RATE = 0.1
 MUTATION_MODULUS = 0.3
 GENERATIONS = 1000
 BREEDING_NUM = 5
-TOP_SCORES_TO_CONSERVE = 35
-BREED_EVERY = 5
+TOP_SCORES_TO_CONSERVE = 40
+BREED_EVERY = 3
 HIDDEN_LAYER_SIZE = 8
 CHECKPOINT = 102
 
@@ -74,9 +74,12 @@ def mutate_population():
 def breed_population():
     """Make the best individual the parent of all others and create the next generation."""
     global population
+    gene_pool = population + previous_population
+    gene_pool.sort(key=lambda ind: ind["car"].fitness, reverse=True)
     
     # Find the best individual (highest fitness)
-    best_individual = max(population, key=lambda ind: ind["car"].fitness)
+    best_individual = gene_pool[0]
+    gene_pool = gene_pool[1: POPULATION_SIZE]
     best_perceptron = best_individual["perceptron"]
     
     # Create new population with the best individual as parent
@@ -89,13 +92,9 @@ def breed_population():
     })
 
     # Create the rest of the population by crossing over the best individual with others
-    for _ in range(POPULATION_SIZE - 1):
-        # Choose a random individual from the population
-        random_individual = random.choice(population)
-        random_perceptron = random_individual["perceptron"]
-        
+    for individual in gene_pool: 
         # Perform crossover between the best individual and the random individual
-        child_perceptron = Perceptron.crossover(best_perceptron, random_perceptron)
+        child_perceptron = Perceptron.crossover(best_perceptron, individual['perceptron'])
         
         # Optionally, you can mutate the child perceptron to maintain genetic diversity
         child_perceptron.mutate(MUTATION_RATE / 5, MUTATION_MODULUS / 2)
@@ -107,6 +106,7 @@ def breed_population():
         })
 
     population = new_population
+    len(population)
 
 previous_generation_best_fitness = 0
 best_fitness = 0
