@@ -4,6 +4,7 @@ import numpy as np
 import cv2
 from perceptron import *
 
+
 # Screen dimensions
 WIDTH, HEIGHT = 1920, 1080
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -18,6 +19,7 @@ GREEN = (0, 255, 0)
 
 path_img = pygame.image.load("track.png")  # Replace with your path image
 path_img = pygame.transform.scale(path_img, (WIDTH, HEIGHT))  # Scale to fit screen
+
 
 class Car:
     def __init__(self, checkpoint_, checkpoints, angle=90, speed=0, car_img='car.png', color=BLUE):
@@ -61,9 +63,11 @@ class Car:
 
         self.running = True
 
+
     def die(self):
         self.running = False
         self.max_score = max(self.max_score, self.checkpoints_reached)
+
 
     def update(self, turn=0, accel=0):
         """
@@ -113,6 +117,7 @@ class Car:
         if not self.is_on_path() or timeout:
             self.die()
 
+
     def draw(self):
         custom_hitbox = pygame.Rect(0, 0, self.hitbox[0], self.hitbox[1])
         custom_hitbox.center = self.rect.center
@@ -121,6 +126,7 @@ class Car:
         rotated_car = pygame.transform.rotate(self.image, self.angle)
         self.rect = rotated_car.get_rect(center=(self.x, self.y))
         screen.blit(rotated_car, self.rect.topleft)
+
 
     def is_on_path(self):
         points_to_check = [
@@ -135,6 +141,7 @@ class Car:
                 if path_img.get_at((int(point[0]), int(point[1]))) != WHITE:
                     return False
         return True
+
     
     def is_on_checkpoint(self):
         points = [self.rect.topleft, self.rect.topright, self.rect.bottomleft, self.rect.bottomright]
@@ -153,6 +160,7 @@ class Car:
 
                 #show checkpoint reached
                 pygame.draw.polygon(screen, self.color, rect_points, 15)
+
 
     def cast_rays(self):
         """
