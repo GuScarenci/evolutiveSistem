@@ -54,8 +54,10 @@ reset_ai_car()
 
 json_file_path = "checkpoints.json"  # Replace with your JSON file path
 checkpoints = load_checkpoints(json_file_path)
-current_checkpoint = 8
+current_checkpoint = 27
 checkpoints_reached = 0
+max_frames_to_reach_checkpoint = 300
+frames_since_last_checkpoint = 0
 
 while running:
     screen.fill(BLACK)
@@ -72,13 +74,14 @@ while running:
     # Check if AI car dies
     if not is_car_on_path([
         car_rect.topleft, car_rect.topright, car_rect.bottomleft, car_rect.bottomright
-    ]):
+    ]) or frames_since_last_checkpoint > max_frames_to_reach_checkpoint:
         scores[current_ai] = checkpoints_reached/time_alive + time_alive
+        frames_since_last_checkpoint = 0
         current_ai += 1
         if current_ai >= POPULATION_SIZE:
             evolve_population()
             current_ai = 0
-        current_checkpoint = 8
+        current_checkpoint = 27
         checkpoints_reached = 0
         reset_ai_car()
 
@@ -86,6 +89,7 @@ while running:
 
     if car_inside_checkpoint:
         print(f"AI car reached checkpoint {current_checkpoint}")
+        frames_since_last_checkpoint = 0
         checkpoints_reached += 1
         current_checkpoint += 1
         if current_checkpoint > len(checkpoints):
@@ -93,6 +97,7 @@ while running:
 
     # Update score for current AI
     time_alive += 1
+    frames_since_last_checkpoint += 1
 
     # Update display
     pygame.display.flip()
