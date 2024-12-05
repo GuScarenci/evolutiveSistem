@@ -1,6 +1,44 @@
 import pygame
 import sys
 import math
+import json
+import cv2
+import numpy as np
+
+# Function to load the checkpoint data from the JSON file
+def load_checkpoints(json_file_path):
+    with open(json_file_path, "r") as file:
+        checkpoints = json.load(file)
+    return checkpoints
+
+# Function to check if a point is inside a checkpoint rectangle
+def is_point_inside_checkpoint(checkpoints, checkpoint_number, point):
+    """
+    Verifies if a given point is inside the rectangle of a specific checkpoint.
+
+    Args:
+        checkpoints (list): List of checkpoint data loaded from the JSON.
+        checkpoint_number (int): The ID of the checkpoint to check.
+        point (tuple): The point (x, y) to check.
+
+    Returns:
+        bool: True if the point is inside the rectangle, False otherwise.
+    """
+    # Find the specified checkpoint
+    for checkpoint in checkpoints:
+        if checkpoint["id"] == checkpoint_number:
+            rectangle = checkpoint["rectangle"]
+
+            # Convert the rectangle points to a numpy array
+            rect_points = np.array(rectangle, dtype=np.int32)
+
+            # Use cv2.pointPolygonTest to check if the point is inside
+            inside = cv2.pointPolygonTest(rect_points, point, False)
+
+            return inside >= 0  # Returns True if point is inside or on the edge
+
+    # If checkpoint number is not found, raise an error
+    raise ValueError(f"Checkpoint {checkpoint_number} not found in the JSON file.")
 
 # Initialize Pygame
 pygame.init()
@@ -35,6 +73,11 @@ replay_text = small_font.render("Replay", True, WHITE)
 # Replay button dimensions
 button_width, button_height = 200, 50
 button_x, button_y = WIDTH // 2 - button_width // 2, HEIGHT // 2 + 50
+
+json_file_path = "checkpoints.json"  # Replace with your JSON file path
+checkpoints = load_checkpoints(json_file_path)
+current_checkpoint = 8
+checkpoints_reached = 0
 
 # Reset game variables
 def reset_game():
@@ -133,6 +176,15 @@ while running:
     ]
     if not is_car_on_path(points_to_check):
         game_over = True  # Trigger game over state
+
+    car_inside_checkpoint = is_point_inside_checkpoint(checkpoints, current_checkpoint, car_rect.topleft) or is_point_inside_checkpoint(checkpoints, current_checkpoint, car_rect.topright) or is_point_inside_checkpoint(checkpoints, current_checkpoint, car_rect.bottomleft) or is_point_inside_checkpoint(checkpoints, current_checkpoint, car_rect.bottomright)
+
+    if car_inside_checkpoint:
+        checkpoints_reached += 1
+        current_checkpoint += 1
+        print(f"Checkpoint {current_checkpoint - 1} reached! Total: {checkpoints_reached}")
+        if current_checkpoint > len(checkpoints):
+            current_checkpoint = 1
 
     # Update display
     pygame.display.flip()
