@@ -29,7 +29,7 @@ path_img = pygame.transform.scale(path_img, (WIDTH, HEIGHT))  # Scale to fit scr
 
 
 class Car:
-    def __init__(self, x, y, angle=0, speed=0, color=RED):
+    def __init__(self, x, y, angle=90, speed=0, color=BLUE):
         self.start_X = x
         self.start_Y = y
         self.start_angle = angle
