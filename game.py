@@ -24,7 +24,7 @@ car_img  = pygame.transform.scale(car_img, (30, 30))
 
 
 class Car:
-    def __init__(self, checkpoint_, checkpoints, angle=-90, 
+    def __init__(self, checkpoint_, checkpoints, angle=90, 
                  speed=0, car_img=car_img, color=BLUE, training_mode = True):
         self.start_checkpoint = checkpoint_ - 1 if checkpoint_ is not None else None
         self.checkpoints = checkpoints
@@ -39,9 +39,8 @@ class Car:
         self.acceleration = 0.05
         self.deceleration = 0.1
         self.hitbox = (25, 20)
-        self.max_ray_length = 110
         self.max_frames_to_reach_checkpoint = 100
-        self.ray_angles = [-90, -45, 0, 45, 90, 180]
+        self.ray_angles = [(-90, 110), (-45, 150), (0, 200), (45, 150), (90, 110), (180, 100)]
         self.max_laps_in_training = 2
 
         self.max_score = 0
@@ -191,10 +190,10 @@ class Car:
     def cast_rays(self):
         self.ray_distances = []
         self.ray_points = []
-        for angle_offset in self.ray_angles:
+        for angle_offset, max_distance in self.ray_angles:
             ray_angle = self.angle + angle_offset
             distance = 0
-            while distance < self.max_ray_length:
+            while distance < max_distance:
                 ray_x = self.x - distance * math.sin(math.radians(ray_angle))
                 ray_y = self.y - distance * math.cos(math.radians(ray_angle))
 
@@ -206,7 +205,7 @@ class Car:
 
                 distance += 1
 
-            if distance == self.max_ray_length:
+            if distance == max_distance:
                 distance = -1
 
             self.ray_distances.append(distance)
