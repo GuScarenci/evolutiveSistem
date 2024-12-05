@@ -82,6 +82,7 @@ def breed_population():
 
     # Create new population
     new_population = population[:TOP_SCORES_TO_CONSERVE]
+    top_fittest = population[:BREEDING_NUM]
 
     # Create 10 pairwise crossovers between the top 5
     for i in range(BREEDING_NUM):
@@ -99,7 +100,7 @@ def breed_population():
     while len(new_population) < POPULATION_SIZE:
         new_population.append({
             "perceptron": Perceptron(input_size=6, hidden_size=HIDDEN_LAYER_SIZE, output_size=2),
-            "car": Car(None, checkpoints, color=random.choice([RED, GREEN, BLUE]))
+            "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
         })
 
     population = new_population
