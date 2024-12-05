@@ -69,6 +69,9 @@ def create_next_generation():
     
     return new_population
 
+previous_generation_best_fitness = 0
+best_fitness = 0
+
 while running:
     screen.fill(BLACK)
     screen.blit(path_img, (0, 0))
@@ -83,10 +86,12 @@ while running:
     # Check if all cars have stopped running
     if all(not individual["car"].running for individual in population):
         generation += 1
-        print(f"Generation {generation} completed. Best fitness: {population[0]['car'].fitness}")
         if generation > GENERATIONS:
             running = False
             continue
+        previous_generation_best_fitness = max(individual["car"].fitness for individual in population)
+        best_fitness = max(best_fitness, previous_generation_best_fitness)
+
         population = create_next_generation()
 
     # Render cars and display stats
@@ -94,7 +99,8 @@ while running:
         individual["car"].draw()
 
     font = pygame.font.Font(None, 36)
-    text = font.render(f"Generation: {generation}", True, WHITE)
+    message = f"Generation: {generation} | Previous best fitness: {previous_generation_best_fitness:.0f} | Best fitness Overall: {best_fitness:.0f}"
+    text = font.render(message, True, WHITE)
     screen.blit(text, (10, 10))
 
     pygame.display.flip()

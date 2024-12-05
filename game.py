@@ -39,7 +39,7 @@ class Car:
         self.deceleration = 0.1
         self.hitbox = (25, 20)
         self.max_ray_length = 300
-        self.max_frames_to_reach_checkpoint = 300
+        self.max_frames_to_reach_checkpoint = 60
         self.ray_angles = [-90, -45, 0, 45, 90, 180]
         self.image = pygame.transform.scale(self.image, (30, 30))  # Resize car
 
@@ -97,7 +97,7 @@ class Car:
             if self.speed > 0:
                 self.speed = max(self.speed - self.deceleration, -self.max_speed / 2)
             else:
-                self.speed = max(self.speed - self.acceleration, -self.max_speed / 2)
+                self.speed = max(self.speed - self.acceleration * 0.2, -self.max_speed / 2)
         else:
             self.speed *= 0.99  # Natural deceleration
 
@@ -115,7 +115,7 @@ class Car:
         self.time_alive += 1
         self.lap_time += 1
 
-        self.fitness = self.checkpoints_reached * 1000 + self.time_alive*self.checkpoints_reached
+        self.fitness = self.checkpoints_reached * 1000 + self.time_alive/60
 
         timeout = self.frames_since_last_checkpoint > self.max_frames_to_reach_checkpoint
         if not self.is_on_path() or timeout:
@@ -130,6 +130,12 @@ class Car:
         rotated_car = pygame.transform.rotate(self.image, self.angle)
         self.rect = rotated_car.get_rect(center=(self.x, self.y))
         screen.blit(rotated_car, self.rect.topleft)
+
+        # write fitness score next to the car
+        font = pygame.font.Font(None, 36)
+        message = f"{self.fitness:.0f}"
+        text = font.render(message, True, BLACK)
+        screen.blit(text, (self.x, self.y))
 
 
     def is_on_path(self):
@@ -154,7 +160,7 @@ class Car:
             try:
                 rectangle = self.checkpoints[self.next_checkpoint]["rectangle"]
             except IndexError:
-                print("IndexError: Checkpoints list is empty.")
+                rectangle = self.checkpoints[0]["rectangle"]
             rect_points = np.array(rectangle, dtype=np.int32)
             inside = cv2.pointPolygonTest(rect_points, point, False)
 
