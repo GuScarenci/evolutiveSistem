@@ -80,16 +80,16 @@ while running:
 
     for car in cars:
         car.update(random.randint(-1, 1), random.randint(-1, 1))
+        car.cast_rays(path_img)
         if not car.is_on_path(path_img):
             car.running = False
-        else:
             car.draw()
 
     playerCar.update(turn, accel)
+    playerCar.cast_rays(path_img)
     if not playerCar.is_on_path(path_img):
         playerCar.running = False
         
-
     # Update display
     pygame.display.flip()
     clock.tick(FPS)

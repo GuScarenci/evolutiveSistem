@@ -53,6 +53,8 @@ class Car:
         self.acceleration = 0.05
         self.deceleration = 0.1
         self.hitbox = (25, 20)
+        self.max_ray_length = 300
+        self.ray_angles = [-90, -45, 0, 45, 90, 180]
 
         self.image = car_img
         self.color = color
@@ -65,6 +67,7 @@ class Car:
         self.angle = self.start_angle
         self.speed = self.start_speed
         self.rect = self.image.get_rect(center=(self.x, self.y))
+        self.ray_distances = [0] * len(self.ray_angles)
         self.running = True
 
     def update(self, turn=0, accel=0):
@@ -124,7 +127,36 @@ class Car:
                 if path_img.get_at((int(point[0]), int(point[1]))) != WHITE:
                     return False
         return True
+    
+    def cast_rays(self, path_img):
+        """
+        Casts rays in predefined directions and calculates the distance to the nearest non-white pixel.
+        """
+        self.ray_distances = []
+        for angle_offset in self.ray_angles:
+            ray_angle = self.angle + angle_offset
+            distance = 0
+            while distance < self.max_ray_length:
+                # Calculate the position of the ray endpoint
+                ray_x = self.x - distance * math.sin(math.radians(ray_angle))
+                ray_y = self.y - distance * math.cos(math.radians(ray_angle))
 
+                # Check if the ray is out of bounds
+                if not (0 <= ray_x < WIDTH and 0 <= ray_y < HEIGHT):
+                    break
+
+                # Check if the pixel is off the track
+                if path_img.get_at((int(ray_x), int(ray_y))) != WHITE:
+                    break
+
+                distance += 1
+            
+            if distance == self.max_ray_length:
+                distance = -1
+
+            self.ray_distances.append(distance)
+            # Visualize the ray
+            pygame.draw.line(screen, self.color, (self.x, self.y), (ray_x, ray_y), 1)
 
 # Genetic Algorithm functions
 def crossover(parent1, parent2):
