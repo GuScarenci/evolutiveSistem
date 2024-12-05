@@ -14,3 +14,14 @@ class NeuralNetwork:
         hidden_layer = np.tanh(np.dot(inputs, self.input_to_hidden) + self.hidden_bias)
         output_layer = np.tanh(np.dot(hidden_layer, self.hidden_to_output) + self.output_bias)
         return output_layer
+    
+    def crossover(parent1, parent2):
+        child = NeuralNetwork(input_size=4, hidden_size=6, output_size=2)
+        child.input_to_hidden = (parent1.input_to_hidden + parent2.input_to_hidden) / 2
+        child.hidden_to_output = (parent1.hidden_to_output + parent2.hidden_to_output) / 2
+        return child
+    
+    def mutate(nn):
+        for matrix in [nn.input_to_hidden, nn.hidden_to_output]:
+            if random.random() < MUTATION_RATE:
+                matrix += np.random.uniform(-0.1, 0.1, matrix.shape)

@@ -145,17 +145,6 @@ class Car:
             # Visualize the ray
             pygame.draw.line(screen, self.color, (self.x, self.y), (ray_x, ray_y), 1)
 
-# Genetic Algorithm functions
-def crossover(parent1, parent2):
-    child = NeuralNetwork(input_size=4, hidden_size=6, output_size=2)
-    child.input_to_hidden = (parent1.input_to_hidden + parent2.input_to_hidden) / 2
-    child.hidden_to_output = (parent1.hidden_to_output + parent2.hidden_to_output) / 2
-    return child
-
-def mutate(nn):
-    for matrix in [nn.input_to_hidden, nn.hidden_to_output]:
-        if random.random() < MUTATION_RATE:
-            matrix += np.random.uniform(-0.1, 0.1, matrix.shape)
 
 def evolve_population():
 
@@ -190,13 +179,4 @@ def get_sensor_data(car_x, car_y, car_angle):
         else:
             distances.append(300)
     return distances
-
-# Check if the car is on the path
-def is_car_on_path(car_rect):
-    for point in car_rect:
-        if 0 <= point[0] < WIDTH and 0 <= point[1] < HEIGHT:
-            pixel_color = path_img.get_at((int(point[0]), int(point[1])))
-            if pixel_color != WHITE:
-                return False
-    return True
 
