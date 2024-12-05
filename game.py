@@ -61,6 +61,7 @@ class Car:
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
         self.fitness = 0
+        self.speed_integral = 0
         self.time_alive = 0
         self.checkpoints_reached = 0
         self.lap_time = 0
@@ -109,9 +110,10 @@ class Car:
 
         self.frames_since_last_checkpoint += 1
         self.time_alive += 1
+        self.speed_integral += self.speed
         self.lap_time += 1
 
-        self.fitness = self.checkpoints_reached * 500
+        self.fitness = self.checkpoints_reached*500 + (self.speed_integral/self.time_alive) * 50
 
         timeout = False
         race_done = False
