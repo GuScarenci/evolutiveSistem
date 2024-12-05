@@ -24,7 +24,7 @@ car_img  = pygame.transform.scale(car_img, (30, 30))
 
 
 class Car:
-    def __init__(self, checkpoint_, checkpoints, angle=90, 
+    def __init__(self, checkpoint_, checkpoints, angle=-90, 
                  speed=0, car_img=car_img, color=BLUE, training_mode = True):
         self.start_checkpoint = checkpoint_ - 1 if checkpoint_ is not None else None
         self.checkpoints = checkpoints
@@ -41,7 +41,7 @@ class Car:
         self.hitbox = (25, 20)
         self.max_frames_to_reach_checkpoint = 100
         #angle tuple: (angle_offset, max_distance)
-        self.ray_angles = [(-90, 210), (-45, 210), (0, 210), (45, 210), (90, 210), (180, 200)]
+        self.ray_angles = [(-90, 110), (-45, 210), (0, 200), (45, 210), (90, 110), (180, 100)]
         self.max_laps_in_training = 2
 
         self.max_score = 0
@@ -113,7 +113,7 @@ class Car:
         self.speed_integral += self.speed
         self.lap_time += 1
 
-        self.fitness = self.checkpoints_reached*500 + (self.speed_integral/self.time_alive) * 50
+        self.fitness = self.checkpoints_reached*500 + (self.speed_integral) * 50
 
         timeout = False
         race_done = False
@@ -123,7 +123,7 @@ class Car:
             if race_done:
                 self.fitness = (self.checkpoints_reached * 500 
                                 + 1/(self.time_alive) * self.max_laps_in_training * 200 * self.checkpoints_reached
-                                + (self.speed_integral/self.time_alive) * 50)
+                                + (self.speed_integral) * 50)
 
         if not self.is_on_path() or timeout or race_done:
             self.die()
