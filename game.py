@@ -16,10 +16,6 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
-# Clock and FPS
-clock = pygame.time.Clock()
-FPS = 60
-
 path_img = pygame.image.load("track.png")  # Replace with your path image
 path_img = pygame.transform.scale(path_img, (WIDTH, HEIGHT))  # Scale to fit screen
 
@@ -44,6 +40,7 @@ class Car:
         self.ray_angles = [-90, -45, 0, 45, 90, 180]
         self.image = pygame.transform.scale(self.image, (30, 30))  # Resize car
 
+        self.max_score = 0
         self.color = color
 
         self.reset()
@@ -63,6 +60,10 @@ class Car:
         self.ray_distances = [0] * len(self.ray_angles)
 
         self.running = True
+
+    def die(self):
+        self.running = False
+        self.max_score = max(self.max_score, self.checkpoints_reached)
 
     def update(self, turn=0, accel=0):
         """
@@ -108,15 +109,9 @@ class Car:
 
         self.fitness = self.checkpoints_reached * 1000 + self.time_alive
 
-        if not self.is_on_path():
-            self.running = False
-            return
-        
         timeout = self.frames_since_last_checkpoint > self.max_frames_to_reach_checkpoint
-        if timeout:
-            self.running = False
-            return
-
+        if not self.is_on_path() or timeout:
+            self.die()
 
     def draw(self):
         custom_hitbox = pygame.Rect(0, 0, self.hitbox[0], self.hitbox[1])
