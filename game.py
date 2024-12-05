@@ -147,10 +147,9 @@ class Car:
         points = [self.rect.topleft, self.rect.topright, self.rect.bottomleft, self.rect.bottomright]
 
         for point in points:
-            try:
-                rectangle = self.checkpoints[self.next_checkpoint]["rectangle"]
-            except IndexError:
-                rectangle = self.checkpoints[0]["rectangle"]
+            if self.next_checkpoint == len(self.checkpoints):
+                self.next_checkpoint = 0
+            rectangle = self.checkpoints[self.next_checkpoint]["rectangle"]
             rect_points = np.array(rectangle, dtype=np.int32)
             inside = cv2.pointPolygonTest(rect_points, point, False)
 
