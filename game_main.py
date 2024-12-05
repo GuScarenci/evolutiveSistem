@@ -47,7 +47,7 @@ while running:
     anchor = 0
     for car in cars:
         font = pygame.font.Font(None, 36)
-        message_top = f"Lap {car.lap_time/FPS:.3f} | Race Time: {car.time_alive/FPS:.1f}"
+        message_top = f"Lap Time {car.lap_time/FPS:.3f} | Race Time: {car.time_alive/FPS:.1f} | Lap: {car.lap_count}"
         message_bottom = f"Last Lap Time: {car.last_lap_time/FPS:.3f} | Best Lap Time: {car.min_lap_time/FPS:.3f}"
         text_top = font.render(message_top, True, car.color)
         text_bottom = font.render(message_bottom, True, car.color)

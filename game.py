@@ -62,6 +62,7 @@ class Car:
         self.time_alive = 0
         self.checkpoints_reached = 0
         self.lap_time = 0
+        self.lap_count = 0
         self.frames_since_last_checkpoint = 0
         self.ray_distances = [0] * len(self.ray_angles)
 
@@ -158,6 +159,7 @@ class Car:
                     self.min_lap_time = min(self.min_lap_time, self.lap_time) if self.min_lap_time != 0 else self.lap_time
                     self.last_lap_time = self.lap_time
                     self.lap_time = 0
+                    self.lap_count += 1
                 self.frames_since_last_checkpoint = 0
                 self.checkpoints_reached += 1
                 self.next_checkpoint += 1
