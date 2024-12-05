@@ -1,73 +1,22 @@
 import pygame
 import sys
 import random
+
+from game import *
+
 import json
 import numpy as np
-from game import *
-from perceptron import Perceptron
 
-# Load checkpoints
 with open("checkpoints.json", "r") as file:
     checkpoints = json.load(file)
 
 pygame.init()
 clock = pygame.time.Clock()
 FPS = 60
-
-# Genetic algorithm parameters
-POPULATION_SIZE = 10
-MUTATION_RATE = 0.1
-GENERATIONS = 100
-
-# Initialize game
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Top-View Race Game with AI")
 running = True
 
-# Create the initial population of Perceptrons and cars
-population = [
-    {
-        "perceptron": Perceptron(input_size=6, hidden_size=6, output_size=2),
-        "car": Car(random.randint(1, len(checkpoints)), checkpoints, color=random.choice([RED, GREEN, BLUE]))
-    }
-    for _ in range(POPULATION_SIZE)
-]
-
-generation = 1
-
-def evaluate_population():
-    """Evaluate the fitness of each car in the population."""
-    for individual in population:
-        car = individual["car"]
-        perceptron = individual["perceptron"]
-        if car.running:
-            inputs = np.array(car.ray_distances)
-            if inputs.max() <= 0:
-                inputs = np.ones_like(inputs) * -1
-            turn, accel = perceptron.forward(inputs)
-            car.update(turn=int(np.sign(turn)), accel=int(np.sign(accel)))
-
-def create_next_generation():
-    """Create the next generation by selecting, crossing over, and mutating perceptrons."""
-    # Sort population by fitness (descending)
-    population.sort(key=lambda ind: ind["car"].fitness, reverse=True)
-    
-    # Keep the top half as parents
-    parents = population[:POPULATION_SIZE // 2]
-    
-    # Create new population through crossover and mutation
-    new_population = []
-    for i in range(POPULATION_SIZE):
-        parent1 = random.choice(parents)["perceptron"]
-        parent2 = random.choice(parents)["perceptron"]
-        child_perceptron = Perceptron.crossover(parent1, parent2)
-        child_perceptron.mutate(MUTATION_RATE)
-        new_population.append({
-            "perceptron": child_perceptron,
-            "car": Car(random.randint(1, len(checkpoints)), checkpoints, color=random.choice([RED, GREEN, BLUE]))
-        })
-    
-    return new_population
+playerCar = Car(64, checkpoints)
+cars = [Car(27, checkpoints, color=RED), Car(28, checkpoints, color=GREEN)]
 
 while running:
     screen.fill(BLACK)
@@ -77,29 +26,29 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Evaluate the population
-    evaluate_population()
-    
-    # Check if all cars have stopped running
-    if all(not individual["car"].running for individual in population):
-        generation += 1
-        print(f"Generation {generation} completed. Best fitness: {population[0]['car'].fitness}")
-        if generation > GENERATIONS:
-            running = False
-            continue
-        population = create_next_generation()
+    if pygame.key.get_pressed()[pygame.K_r]:
+        playerCar.reset()
 
-    # Render cars and display stats
-    for individual in population:
-        individual["car"].draw()
+    keys = pygame.key.get_pressed()
+    turn = -1 if keys[pygame.K_a] else 1 if keys[pygame.K_d] else 0
+    accel = -1 if keys[pygame.K_s] else 1 if keys[pygame.K_w] else 0
+    playerCar.update(turn, accel)
 
+    for car in cars:
+        car.update(random.randint(-1, 1), random.randint(-1, 1))
+
+    #write player current score in the top left
     font = pygame.font.Font(None, 36)
-    text = font.render(f"Generation: {generation}", True, WHITE)
-    screen.blit(text, (10, 10))
+    message_top = f"Current Lap Time {playerCar.lap_time/FPS:.3f} | Score: {playerCar.checkpoints_reached} | Race Time: {playerCar.time_alive/FPS:.1f}"
+    text_top = font.render(message_top, True, BLUE)
+    screen.blit(text_top, (10, 10))
+    message_bottom = f"Last Lap Time: {playerCar.last_lap_time/FPS:.3f} | Max Score: {playerCar.max_score} | Best Lap Time: {playerCar.min_lap_time/FPS:.3f}"
+    text_bottom = font.render(message_bottom, True, BLUE)
+    screen.blit(text_bottom, (10, 50))
 
+    # Update display
     pygame.display.flip()
     clock.tick(FPS)
 
 pygame.quit()
 sys.exit()
-

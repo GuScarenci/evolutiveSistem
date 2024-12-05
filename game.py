@@ -30,6 +30,7 @@ class Car:
         self.checkpoints = checkpoints
         self.start_angle = angle
         self.start_speed = speed
+        self.color = color
         self.image = pygame.image.load(car_img)  # Replace with your car image
 
         self.rotation_speed = 2
@@ -43,7 +44,8 @@ class Car:
         self.image = pygame.transform.scale(self.image, (30, 30))  # Resize car
 
         self.max_score = 0
-        self.color = color
+        self.min_lap_time = 0
+        self.last_lap_time = 0
 
         self.reset()
 
@@ -58,6 +60,7 @@ class Car:
         self.fitness = 0
         self.time_alive = 0
         self.checkpoints_reached = 0
+        self.lap_time = 0
         self.frames_since_last_checkpoint = 0
         self.ray_distances = [0] * len(self.ray_angles)
 
@@ -110,6 +113,7 @@ class Car:
 
         self.frames_since_last_checkpoint += 1
         self.time_alive += 1
+        self.lap_time += 1
 
         self.fitness = self.checkpoints_reached * 1000 + self.time_alive
 
@@ -152,6 +156,10 @@ class Car:
             inside = cv2.pointPolygonTest(rect_points, point, False)
 
             if inside >= 0:
+                if self.next_checkpoint == self.start_checkpoint:
+                    self.min_lap_time = min(self.min_lap_time, self.lap_time) if self.min_lap_time != 0 else self.lap_time
+                    self.last_lap_time = self.lap_time
+                    self.lap_time = 0
                 self.frames_since_last_checkpoint = 0
                 self.checkpoints_reached += 1
                 self.next_checkpoint += 1
