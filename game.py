@@ -209,7 +209,7 @@ class Car:
             if distance == max_distance:
                 distance = -1
 
-            self.ray_distances.append(distance)
+            self.ray_distances.append(distance/max_distance)
             self.ray_points.append((ray_x, ray_y))
 
     def copy(self):
