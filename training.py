@@ -33,7 +33,7 @@ running = True
 population = [
     {
         "perceptron": Perceptron(input_size=6, hidden_size=HIDDEN_LAYER_SIZE, output_size=2),
-        "car": Car(None, checkpoints, color=random.choice([RED, GREEN, BLUE]))
+        "car": Car(0, checkpoints, color=random.choice([RED, GREEN, BLUE]))
     }
     for _ in range(POPULATION_SIZE)
 ]
@@ -54,8 +54,7 @@ def evaluate_population():
 
 def mutate_population():
     """Mutate the population and rollback if fitness decreases."""
-    global population
-    previous_population = [
+    global previous_population = [
         {
             "perceptron": individual["perceptron"].copy(),
             "car": individual["car"].copy()
@@ -79,14 +78,8 @@ def breed_population():
     # Sort population by fitness (descending)
     population.sort(key=lambda ind: ind["car"].fitness, reverse=True)
 
-    # Select the top 5 fittest
-    top_fittest = population[:TOP_SCORES_TO_CONSERVE]
-
     # Create new population
-    new_population = []
-
-    # Keep the top 5
-    new_population.extend(top_fittest)
+    new_population = population[:TOP_SCORES_TO_CONSERVE]
 
     # Create 10 pairwise crossovers between the top 5
     for i in range(BREEDING_NUM):
@@ -97,14 +90,14 @@ def breed_population():
             child_perceptron.mutate(MUTATION_RATE, MUTATION_MODULUS)
             new_population.append({
                 "perceptron": child_perceptron,
-                "car": Car(None, checkpoints, color=random.choice([RED, GREEN, BLUE]))
+                "car": Car(0, checkpoints, color=random.choice([RED, GREEN, BLUE]))
             })
 
     # Add 5 new random individuals
     while len(new_population) < POPULATION_SIZE:
         new_population.append({
             "perceptron": Perceptron(input_size=6, hidden_size=HIDDEN_LAYER_SIZE, output_size=2),
-            "car": Car(None, checkpoints, color=random.choice([RED, GREEN, BLUE]))
+            "car": Car(0, checkpoints, color=random.choice([RED, GREEN, BLUE]))
         })
 
     population = new_population
