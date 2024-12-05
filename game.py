@@ -41,7 +41,7 @@ class Car:
         self.hitbox = (25, 20)
         self.max_frames_to_reach_checkpoint = 100
         #angle tuple: (angle_offset, max_distance)
-        self.ray_angles = [(-90, 110), (-45, 150), (0, 200), (45, 150), (90, 110), (180, 100)]
+        self.ray_angles = [(-90, 110), (-45, 110), (0, 110), (45, 110), (90, 110), (180, 100)]
         self.max_laps_in_training = 2
 
         self.max_score = 0
