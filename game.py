@@ -67,14 +67,13 @@ class Car:
         self.rect = self.image.get_rect(center=(self.x, self.y))
         self.running = True
 
-    def update(self, turn=0, accelerate=False, brake=False):
+    def update(self, turn=0, accel=0):
         """
         Update the car's state.
         
         Args:
             turn (int): -1 for left, 1 for right, 0 for no turning.
-            accelerate (bool): True to accelerate, False otherwise.
-            brake (bool): True to brake, False otherwise.
+            accel (int): 1 for acceleration, 0 for no acceleration, -1 for braking
         """
         if not self.running:
             return
@@ -86,9 +85,9 @@ class Car:
             self.angle -= self.rotation_speed
 
         # Handle acceleration and braking
-        if accelerate:
+        if accel == 1:  # Accelerate
             self.speed = min(self.speed + self.acceleration, self.max_speed)
-        elif brake:
+        elif accel == -1:  # Brake
             if self.speed > 0:
                 self.speed = max(self.speed - self.deceleration, -self.max_speed / 2)
             else:

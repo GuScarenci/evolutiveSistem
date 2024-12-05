@@ -76,17 +76,16 @@ while running:
 
     keys = pygame.key.get_pressed()
     turn = -1 if keys[pygame.K_a] else 1 if keys[pygame.K_d] else 0
-    accelerate = keys[pygame.K_w]
-    brake = keys[pygame.K_s]
+    accel = -1 if keys[pygame.K_s] else 1 if keys[pygame.K_w] else 0
 
     for car in cars:
-        car.update(random.randint(-1, 1), random.choice([True, False]), random.choice([True, False]))
+        car.update(random.randint(-1, 1), random.randint(-1, 1))
         if not car.is_on_path(path_img):
             car.running = False
         else:
             car.draw()
 
-    playerCar.update(turn, accelerate, brake)
+    playerCar.update(turn, accel)
     if not playerCar.is_on_path(path_img):
         playerCar.running = False
         
