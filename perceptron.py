@@ -1,7 +1,5 @@
 import numpy as np
-import random
 
-# Neural Network Class
 class Perceptron:
     def __init__(self, input_size, hidden_size, output_size):
         """
@@ -16,7 +14,6 @@ class Perceptron:
         self.hidden_to_output = np.random.uniform(-1, 1, (hidden_size, output_size))
         self.hidden_bias = np.zeros(hidden_size)
         self.output_bias = np.zeros(output_size)
-        
 
     def forward(self, inputs):
         """
@@ -31,7 +28,6 @@ class Perceptron:
         hidden_layer = np.tanh(np.dot(inputs, self.input_to_hidden) + self.hidden_bias)
         output_layer = np.tanh(np.dot(hidden_layer, self.hidden_to_output) + self.output_bias)
         return output_layer
-
 
     @staticmethod
     def crossover(parent1, parent2):
@@ -54,7 +50,6 @@ class Perceptron:
         child.output_bias = (parent1.output_bias + parent2.output_bias) / 2
         return child
 
-
     def mutate(self, mutation_rate=0.1):
         """
         Mutate the perceptron's weights and biases.
@@ -64,19 +59,34 @@ class Perceptron:
         """
         for i in range(self.input_to_hidden.shape[0]):
             for j in range(self.input_to_hidden.shape[1]):
-                if random.random() < mutation_rate:
+                if np.random.uniform(0, 1) < mutation_rate:
                     self.input_to_hidden[i, j] += np.random.uniform(-0.5, 0.5)
 
         for i in range(self.hidden_to_output.shape[0]):
             for j in range(self.hidden_to_output.shape[1]):
-                if random.random() < mutation_rate:
+                if np.random.uniform(0, 1) < mutation_rate:
                     self.hidden_to_output[i, j] += np.random.uniform(-0.5, 0.5)
 
         for i in range(self.hidden_bias.shape[0]):
-            if random.random() < mutation_rate:
+            if np.random.uniform(0, 1) < mutation_rate:
                 self.hidden_bias[i] += np.random.uniform(-0.5, 0.5)
 
         for i in range(self.output_bias.shape[0]):
-            if random.random() < mutation_rate:
+            if np.random.uniform(0, 1) < mutation_rate:
                 self.output_bias[i] += np.random.uniform(-0.5, 0.5)
 
+    def copy(self):
+        """
+        Create a deep copy of the perceptron instance.
+
+        Returns:
+            Perceptron: A new perceptron object with the same attributes.
+        """
+        copied = Perceptron(input_size=self.input_to_hidden.shape[0], 
+                            hidden_size=self.input_to_hidden.shape[1], 
+                            output_size=self.hidden_to_output.shape[1])
+        copied.input_to_hidden = np.copy(self.input_to_hidden)
+        copied.hidden_to_output = np.copy(self.hidden_to_output)
+        copied.hidden_bias = np.copy(self.hidden_bias)
+        copied.output_bias = np.copy(self.output_bias)
+        return copied

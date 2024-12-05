@@ -4,7 +4,6 @@ import numpy as np
 import cv2
 from perceptron import *
 
-
 # Screen dimensions
 WIDTH, HEIGHT = 1920, 1080
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -19,11 +18,14 @@ GREEN = (0, 255, 0)
 
 path_img = pygame.image.load("track.png")  # Replace with your path image
 path_img = pygame.transform.scale(path_img, (WIDTH, HEIGHT))  # Scale to fit screen
+car_img  = pygame.image.load("car.png")
+car_img  = pygame.transform.scale(car_img, (30, 30))
 
 
 class Car:
-    def __init__(self, checkpoint_, checkpoints, angle=90, speed=0, car_img='car.png', color=BLUE):
-        self.start_checkpoint = checkpoint_ -1
+    def __init__(self, checkpoint_, checkpoints, angle=90, 
+                 speed=0, car_img=car_img, color=BLUE):
+        self.start_checkpoint = checkpoint_ - 1
         checkpoint = checkpoints[self.start_checkpoint]["rectangle"]
         self.start_X = sum(x for x, y in checkpoint) / 4
         self.start_Y = sum(y for x, y in checkpoint) / 4
@@ -31,7 +33,7 @@ class Car:
         self.start_angle = angle
         self.start_speed = speed
         self.color = color
-        self.image = pygame.image.load(car_img)  # Replace with your car image
+        self.image = car_img
 
         self.rotation_speed = 2
         self.max_speed = 5
@@ -41,7 +43,6 @@ class Car:
         self.max_ray_length = 300
         self.max_frames_to_reach_checkpoint = 60
         self.ray_angles = [-90, -45, 0, 45, 90, 180]
-        self.image = pygame.transform.scale(self.image, (30, 30))  # Resize car
 
         self.max_score = 0
         self.min_lap_time = 0
@@ -54,7 +55,7 @@ class Car:
         self.y = self.start_Y
         self.angle = self.start_angle
         self.speed = self.start_speed
-        self.next_checkpoint = self.start_checkpoint+1
+        self.next_checkpoint = self.start_checkpoint + 1
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
         self.fitness = 0
@@ -66,20 +67,11 @@ class Car:
 
         self.running = True
 
-
     def die(self):
         self.running = False
         self.max_score = max(self.max_score, self.checkpoints_reached)
 
-
     def update(self, turn=0, accel=0):
-        """
-        Update the car's state.
-        
-        Args:
-            turn (int): -1 for left, 1 for right, 0 for no turning.
-            accel (int): 1 for acceleration, 0 for no acceleration, -1 for braking
-        """
         if not self.running:
             self.draw()
             return
@@ -121,7 +113,6 @@ class Car:
         if not self.is_on_path() or timeout:
             self.die()
 
-
     def draw(self):
         custom_hitbox = pygame.Rect(0, 0, self.hitbox[0], self.hitbox[1])
         custom_hitbox.center = self.rect.center
@@ -152,7 +143,6 @@ class Car:
                     return False
         return True
 
-    
     def is_on_checkpoint(self):
         points = [self.rect.topleft, self.rect.topright, self.rect.bottomleft, self.rect.bottomright]
 
@@ -175,36 +165,60 @@ class Car:
                 if self.next_checkpoint == len(self.checkpoints):
                     self.next_checkpoint = 0
 
-                #show checkpoint reached
                 pygame.draw.polygon(screen, self.color, rect_points, 15)
 
-
     def cast_rays(self):
-        """
-        Casts rays in predefined directions and calculates the distance to the nearest non-white pixel.
-        """
         self.ray_distances = []
         for angle_offset in self.ray_angles:
             ray_angle = self.angle + angle_offset
             distance = 0
             while distance < self.max_ray_length:
-                # Calculate the position of the ray endpoint
                 ray_x = self.x - distance * math.sin(math.radians(ray_angle))
                 ray_y = self.y - distance * math.cos(math.radians(ray_angle))
 
-                # Check if the ray is out of bounds
                 if not (0 <= ray_x < WIDTH and 0 <= ray_y < HEIGHT):
                     break
 
-                # Check if the pixel is off the track
                 if path_img.get_at((int(ray_x), int(ray_y))) != WHITE:
                     break
 
                 distance += 1
-            
+
             if distance == self.max_ray_length:
                 distance = -1
 
             self.ray_distances.append(distance)
-            # Visualize the ray
             pygame.draw.line(screen, self.color, (self.x, self.y), (ray_x, ray_y), 1)
+
+    def copy(self):
+        """
+        Creates a deep copy of the Car instance.
+        """
+        new_car = Car(
+            checkpoint_=self.start_checkpoint + 1,
+            checkpoints=self.checkpoints,
+            angle=self.start_angle,
+            speed=self.start_speed,
+            car_img=self.image,  # Use the existing car image
+            color=self.color
+        )
+
+        new_car.x = self.x
+        new_car.y = self.y
+        new_car.angle = self.angle
+        new_car.speed = self.speed
+        new_car.next_checkpoint = self.next_checkpoint
+        new_car.fitness = self.fitness
+        new_car.time_alive = self.time_alive
+        new_car.checkpoints_reached = self.checkpoints_reached
+        new_car.lap_time = self.lap_time
+        new_car.frames_since_last_checkpoint = self.frames_since_last_checkpoint
+        new_car.ray_distances = self.ray_distances[:]
+        new_car.running = self.running
+        new_car.max_score = self.max_score
+        new_car.min_lap_time = self.min_lap_time
+        new_car.last_lap_time = self.last_lap_time
+
+        new_car.rect = self.rect.copy()
+
+        return new_car

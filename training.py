@@ -15,7 +15,7 @@ clock = pygame.time.Clock()
 FPS = 60
 
 # Genetic algorithm parameters
-POPULATION_SIZE = 10
+POPULATION_SIZE = 20
 MUTATION_RATE = 0.1
 GENERATIONS = 100
 
@@ -47,27 +47,62 @@ def evaluate_population():
             turn, accel = perceptron.forward(inputs)
             car.update(turn=int(np.sign(turn)), accel=int(np.sign(accel)))
 
-def create_next_generation():
-    """Create the next generation by selecting, crossing over, and mutating perceptrons."""
+def mutate_population():
+    """Mutate the population and rollback if fitness decreases."""
+    global population
+    previous_population = [
+        {
+            "perceptron": individual["perceptron"].copy(),
+            "car": individual["car"].copy()
+        }
+        for individual in population
+    ]
+    for individual in population:
+        individual["perceptron"].mutate(MUTATION_RATE)
+
+    # Reevaluate fitness after mutation
+    evaluate_population()
+
+    # Rollback if fitness is worse
+    for i in range(len(population)):
+        if population[i]["car"].fitness < previous_population[i]["car"].fitness:
+            population[i] = previous_population[i]
+
+def breed_population():
+    """Select the top 5 fittest individuals and create the next generation."""
+    global population
     # Sort population by fitness (descending)
     population.sort(key=lambda ind: ind["car"].fitness, reverse=True)
-    
-    # Keep the top half as parents
-    parents = population[:POPULATION_SIZE // 2]
-    
-    # Create new population through crossover and mutation
+
+    # Select the top 5 fittest
+    top_fittest = population[:5]
+
+    # Create new population
     new_population = []
-    for i in range(POPULATION_SIZE):
-        parent1 = random.choice(parents)["perceptron"]
-        parent2 = random.choice(parents)["perceptron"]
-        child_perceptron = Perceptron.crossover(parent1, parent2)
-        child_perceptron.mutate(MUTATION_RATE)
+
+    # Keep the top 5
+    new_population.extend(top_fittest)
+
+    # Create 10 pairwise crossovers between the top 5
+    for i in range(5):
+        for j in range(i + 1, 5):
+            parent1 = top_fittest[i]["perceptron"]
+            parent2 = top_fittest[j]["perceptron"]
+            child_perceptron = Perceptron.crossover(parent1, parent2)
+            child_perceptron.mutate(MUTATION_RATE)
+            new_population.append({
+                "perceptron": child_perceptron,
+                "car": Car(random.randint(1, len(checkpoints)), checkpoints, color=random.choice([RED, GREEN, BLUE]))
+            })
+
+    # Add 5 new random individuals
+    while len(new_population) < POPULATION_SIZE:
         new_population.append({
-            "perceptron": child_perceptron,
+            "perceptron": Perceptron(input_size=6, hidden_size=6, output_size=2),
             "car": Car(random.randint(1, len(checkpoints)), checkpoints, color=random.choice([RED, GREEN, BLUE]))
         })
-    
-    return new_population
+
+    population = new_population
 
 previous_generation_best_fitness = 0
 best_fitness = 0
@@ -85,14 +120,24 @@ while running:
     
     # Check if all cars have stopped running
     if all(not individual["car"].running for individual in population):
+
+        if generation % 10 == 0:
+            breed_population()
+        else:
+            mutate_population()
+
         generation += 1
         if generation > GENERATIONS:
             running = False
             continue
+
         previous_generation_best_fitness = max(individual["car"].fitness for individual in population)
         best_fitness = max(best_fitness, previous_generation_best_fitness)
 
-        population = create_next_generation()
+
+        # Reset cars for the new generation
+        for individual in population:
+            individual["car"].reset()
 
     # Render cars and display stats
     for individual in population:
@@ -108,4 +153,3 @@ while running:
 
 pygame.quit()
 sys.exit()
-
