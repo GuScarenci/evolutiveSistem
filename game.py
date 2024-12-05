@@ -41,6 +41,46 @@ ai_car_angle = 0
 time_alive = 0
 max_speed = 5
 
+
+class Car:
+    def __init__(self, neural_net, x, y):
+        self.neural_net = neural_net
+        self.x = x
+        self.y = y
+        self.speed = 0
+        self.angle = 0
+        self.time_alive = 0
+
+    def reset(self, x, y):
+        self.x = x
+        self.y = y
+        self.speed = 0
+        self.angle = 0
+        self.time_alive = 0
+
+    def update(self):
+        sensor_data = get_sensor_data(self.x, self.y, self.angle)
+        sensor_data = np.array(sensor_data + [self.speed])
+        outputs = self.neural_net.forward(sensor_data)
+        turn, accelerate = outputs
+        self.angle += turn * 5
+        self.speed = min(max(self.speed + accelerate * 0.2, -max_speed / 2), max_speed)
+        self.x -= self.speed * math.sin(math.radians(self.angle))
+        self.y -= self.speed * math.cos(math.radians(self.angle))
+        self.time_alive += 1
+        rotated_car = pygame.transform.rotate(car_img, self.angle)
+        car_rect = rotated_car.get_rect(center=(self.x, self.y))
+        screen.blit(rotated_car, car_rect.topleft)
+        return car_rect
+
+    def is_on_path(self):
+        if 0 <= self.x < WIDTH and 0 <= self.y < HEIGHT:
+            pixel_color = path_img.get_at((int(self.x), int(self.y)))
+            if pixel_color != WHITE:
+                return False
+        return True
+
+
 # Genetic Algorithm functions
 def crossover(parent1, parent2):
     child = NeuralNetwork(input_size=4, hidden_size=6, output_size=2)
