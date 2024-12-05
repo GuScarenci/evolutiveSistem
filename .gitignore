@@ -1,3 +1,4 @@
 # Ignore Pyenv stuff
 env/*
 __pycache__/*
+.venv/
