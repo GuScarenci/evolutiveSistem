@@ -25,13 +25,14 @@ car_img  = pygame.transform.scale(car_img, (30, 30))
 
 class Car:
     def __init__(self, checkpoint_, checkpoints, angle=-90, 
-                 speed=0, car_img=car_img, color=BLUE):
+                 speed=0, car_img=car_img, color=BLUE, training_mode = True):
         self.start_checkpoint = checkpoint_ - 1 if checkpoint_ is not None else None
         self.checkpoints = checkpoints
         self.start_angle = angle
         self.start_speed = speed
         self.color = color
         self.image = car_img
+        self.training_mode = training_mode
 
         self.rotation_speed = 2
         self.max_speed = 5
@@ -110,7 +111,7 @@ class Car:
 
         self.fitness = self.checkpoints_reached * 500 + self.time_alive/10
 
-        timeout = self.frames_since_last_checkpoint > self.max_frames_to_reach_checkpoint
+        timeout = self.frames_since_last_checkpoint > self.max_frames_to_reach_checkpoint if self.training_mode else False
         if not self.is_on_path() or timeout:
             self.die()
 
@@ -124,10 +125,16 @@ class Car:
         screen.blit(rotated_car, self.rect.topleft)
 
         # write fitness score next to the car
-        font = pygame.font.Font(None, 36)
-        message = f"{self.fitness:.0f}"
-        text = font.render(message, True, BLACK)
-        screen.blit(text, (self.x, self.y))
+        if self.training_mode:
+            font = pygame.font.Font(None, 36)
+            message = f"{self.fitness:.0f}"
+            text = font.render(message, True, BLACK)
+            screen.blit(text, (self.x, self.y))
+        else:
+            font = pygame.font.Font(None, 36)
+            message = f"{self.speed:.2f}"
+            text = font.render(message, True, BLACK)
+            screen.blit(text, (self.x, self.y))
 
 
     def is_on_path(self):

@@ -15,8 +15,8 @@ clock = pygame.time.Clock()
 FPS = 60
 running = True
 
-playerCar = Car(102, checkpoints)
-aiCar = Car(102, checkpoints, color=RED)
+playerCar = Car(102, checkpoints, training_mode=False)
+aiCar = Car(102, checkpoints, color=RED, training_mode=False)
 aiPerceptron = Perceptron(input_size=6, hidden_size=6, output_size=2)
 aiPerceptron.load_perceptron("best_perceptron.json.npz")
 
