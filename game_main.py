@@ -22,9 +22,12 @@ aiPerceptron.load_perceptron("safe_perceptron.npz")
 
 cars = [playerCar, aiCar]
 
+trackColored  = pygame.image.load("trackColored.png")
+trackColored  = pygame.transform.scale(trackColored, (1920, 1080))
+
 while running:
     screen.fill(BLACK)
-    screen.blit(path_img, (0, 0))
+    screen.blit(trackColored, (0, 0))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

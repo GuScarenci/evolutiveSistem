@@ -123,9 +123,12 @@ previous_generation_best_fitness = 0
 best_fitness = 0
 generations_since_new_best = 0
 
+trackColored  = pygame.image.load("trackColored.png")
+trackColored  = pygame.transform.scale(trackColored, (1920, 1080))
+
 while running:
     screen.fill(BLACK)
-    screen.blit(path_img, (0, 0))
+    screen.blit(trackColored, (0, 0))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
