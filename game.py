@@ -154,39 +154,3 @@ class Car:
             self.ray_distances.append(distance)
             # Visualize the ray
             pygame.draw.line(screen, self.color, (self.x, self.y), (ray_x, ray_y), 1)
-
-
-def evolve_population():
-
-    # Pair each neural network with its score
-    scored_population = list(zip(scores, population))
-    # Sort by score in descending order
-    scored_population.sort(key=lambda pair: pair[0], reverse=True)
-    # Extract the top half of the population (the best performing networks)
-    survivors = [pair[1] for pair in scored_population[:POPULATION_SIZE // 2]]
-
-    # Reproduce new population with mutations
-    new_population = []
-    for _ in range(POPULATION_SIZE):
-        parent1, parent2 = random.choices(survivors, k=2)  # Select two parents
-        child = crossover(parent1, parent2)  # Combine parents' weights
-        mutate(child)  # Mutate child
-        new_population.append(child)
-    population = new_population
-    scores = [0] * POPULATION_SIZE  # Reset scores for new generation
-
-# Sensor data simulation
-def get_sensor_data(car_x, car_y, car_angle):
-    distances = []
-    for angle_offset in [-45, 0, 45]:
-        angle = math.radians(car_angle + angle_offset)
-        for distance in range(1, 300):
-            x = int(car_x + distance * math.cos(angle))
-            y = int(car_y + distance * math.sin(angle))
-            if 0 <= x < WIDTH and 0 <= y < HEIGHT and path_img.get_at((x, y)) != WHITE:
-                distances.append(distance)
-                break
-        else:
-            distances.append(300)
-    return distances
-
