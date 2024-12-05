@@ -8,12 +8,12 @@ from perceptron import Perceptron
 
 # Genetic Algorithm HYPERPARAMETERS
 POPULATION_SIZE = 50
-MUTATION_RATE = 0.1
+MUTATION_RATE = 0.25
 MUTATION_MODULUS = 1
 GENERATIONS = 1000
 BREEDING_NUM = 5
 TOP_SCORES_TO_CONSERVE = 35
-BREED_EVERY = 5
+BREED_EVERY = 3
 HIDDEN_LAYER_SIZE = 8
 CHECKPOINT = 102
 
@@ -49,6 +49,11 @@ previous_population = [
 
 generation = 1
 
+goldPerceptron = Perceptron(input_size=6, hidden_size=6, output_size=2)
+goldPerceptron.load_perceptron("safe_perceptron.npz")
+
+population[0]["perceptron"] = goldPerceptron
+
 def evaluate_population():
     """Evaluate the fitness of each car in the population."""
     for individual in population:
@@ -73,10 +78,13 @@ def mutate_population():
 
 def breed_population():
     """Make the best individual the parent of all others and create the next generation."""
-    global population
+    global population, generations_since_new_best
+    gene_pool = population + previous_population
+    gene_pool.sort(key=lambda ind: ind["car"].fitness, reverse=True)
     
     # Find the best individual (highest fitness)
-    best_individual = max(population, key=lambda ind: ind["car"].fitness)
+    best_individual = gene_pool[0]
+    gene_pool = gene_pool[1: POPULATION_SIZE]
     best_perceptron = best_individual["perceptron"]
     
     # Create new population with the best individual as parent
@@ -85,17 +93,16 @@ def breed_population():
     # Keep the best individual as-is (no crossover or mutation)
     new_population.append({
         "perceptron": best_perceptron.copy(),
-        "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
+        "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, BLUE]))
     })
 
     # Create the rest of the population by crossing over the best individual with others
-    for _ in range(POPULATION_SIZE - 1):
-        # Choose a random individual from the population
-        random_individual = random.choice(population)
-        random_perceptron = random_individual["perceptron"]
-        
+    for individual in gene_pool: 
         # Perform crossover between the best individual and the random individual
-        child_perceptron = Perceptron.crossover(best_perceptron, random_perceptron)
+        child_perceptron = Perceptron.crossover(best_perceptron, individual['perceptron'])
+
+        if generations_since_new_best > 5:
+            child_perceptron = Perceptron(input_size=6, hidden_size=HIDDEN_LAYER_SIZE, output_size=2)
         
         # Optionally, you can mutate the child perceptron to maintain genetic diversity
         child_perceptron.mutate(MUTATION_RATE / 5, MUTATION_MODULUS / 2)
@@ -103,13 +110,18 @@ def breed_population():
         # Add the child to the new population
         new_population.append({
             "perceptron": child_perceptron,
-            "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
+            "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, BLUE]))
         })
+
+    if generations_since_new_best > 9:
+        print("DECIMATED")
+        generations_since_new_best = 0
 
     population = new_population
 
 previous_generation_best_fitness = 0
 best_fitness = 0
+generations_since_new_best = 0
 
 while running:
     screen.fill(BLACK)
@@ -123,15 +135,21 @@ while running:
     if keys[pygame.K_s]:
         #get best perceptron from population
         best_perceptron = max(population, key=lambda ind: ind["car"].fitness)["perceptron"]
-        best_perceptron.save_perceptron("best_perceptron.json")
-        print("Best perceptron saved to best_perceptron.json")
-        break
+        file_name = f"perceptron_{generation}.json"
+        best_perceptron.save_perceptron(file_name)
+        print(f"Best perceptron saved to {file_name}")
 
     # Evaluate the population
     evaluate_population()
     
     # Check if all cars have stopped running
     if all(not individual["car"].running for individual in population):
+        previous_generation_best_fitness = max(individual["car"].fitness for individual in population)
+        best_fitness = max(best_fitness, previous_generation_best_fitness)
+        generations_since_new_best += 1
+        
+        if previous_generation_best_fitness == best_fitness:
+            generations_since_new_best = 0
         if generation % BREED_EVERY == 0:
             breed_population()
         else:
@@ -142,10 +160,6 @@ while running:
             running = False
             continue
 
-        previous_generation_best_fitness = max(individual["car"].fitness for individual in population)
-        best_fitness = max(best_fitness, previous_generation_best_fitness)
-
-
         # Reset cars for the new generation
         for individual in population:
             individual["car"].reset()
@@ -155,7 +169,7 @@ while running:
         individual["car"].draw()
 
     font = pygame.font.Font(None, 36)
-    message = f"Generation: {generation} | Previous best fitness: {previous_generation_best_fitness:.0f} | Best fitness Overall: {best_fitness:.0f}"
+    message = f"Generation: {generation} | Previous best fitness: {previous_generation_best_fitness:.0f} | Best fitness Overall: {best_fitness:.0f} | Generations since new best: {generations_since_new_best}"
     text = font.render(message, True, WHITE)
     screen.blit(text, (10, 10))
 
