@@ -28,7 +28,7 @@ path_img = pygame.image.load("track.png")  # Replace with your path image
 path_img = pygame.transform.scale(path_img, (WIDTH, HEIGHT))  # Scale to fit screen
 
 # Genetic Algorithm parameters
-POPULATION_SIZE = 10
+POPULATION_SIZE = 5
 MUTATION_RATE = 0.1
 population = [NeuralNetwork(input_size=4, hidden_size=6, output_size=2) for _ in range(POPULATION_SIZE)]
 scores = [0] * POPULATION_SIZE
@@ -100,7 +100,7 @@ def reset_ai_car():
     global ai_car_x, ai_car_y, ai_car_speed, ai_car_angle, time_alive
     ai_car_x, ai_car_y = WIDTH // 2, HEIGHT - 400
     ai_car_speed = 0
-    ai_car_angle = 0
+    ai_car_angle = 90
     time_alive = 0
 
 # Update AI car position

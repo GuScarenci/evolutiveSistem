@@ -27,7 +27,7 @@ for idx, contour in enumerate(contours):
 checkpoint_image = image.copy()
 
 # Number of checkpoints
-num_checkpoints = 40
+num_checkpoints = 150
 
 # Calculate cumulative arc lengths along the outer contour
 outer_length = cv2.arcLength(outer_contour, True)

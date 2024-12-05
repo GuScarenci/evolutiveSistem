@@ -73,11 +73,13 @@ while running:
     if not is_car_on_path([
         car_rect.topleft, car_rect.topright, car_rect.bottomleft, car_rect.bottomright
     ]):
-        scores[current_ai] = time_alive
+        scores[current_ai] = checkpoints_reached/time_alive + time_alive
         current_ai += 1
         if current_ai >= POPULATION_SIZE:
             evolve_population()
             current_ai = 0
+        current_checkpoint = 8
+        checkpoints_reached = 0
         reset_ai_car()
 
     car_inside_checkpoint = is_point_inside_checkpoint(checkpoints, current_checkpoint, car_rect.topleft) or is_point_inside_checkpoint(checkpoints, current_checkpoint, car_rect.topright) or is_point_inside_checkpoint(checkpoints, current_checkpoint, car_rect.bottomleft) or is_point_inside_checkpoint(checkpoints, current_checkpoint, car_rect.bottomright)
