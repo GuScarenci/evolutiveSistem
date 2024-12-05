@@ -6,6 +6,16 @@ import numpy as np
 from game import *
 from perceptron import Perceptron
 
+# Genetic Algorithm HYPERPARAMETERS
+POPULATION_SIZE = 50
+MUTATION_RATE = 0.1
+MUTATION_MODULUS = 0.5
+GENERATIONS = 1000
+BREEDING_NUM = 5
+TOP_SCORES_TO_CONSERVE = 35
+BREED_EVERY = 5
+HIDDEN_LAYER_SIZE = 6
+
 # Load checkpoints
 with open("checkpoints.json", "r") as file:
     checkpoints = json.load(file)
@@ -13,11 +23,6 @@ with open("checkpoints.json", "r") as file:
 pygame.init()
 clock = pygame.time.Clock()
 FPS = 60
-
-# Genetic algorithm parameters
-POPULATION_SIZE = 20
-MUTATION_RATE = 0.1
-GENERATIONS = 1000
 
 # Initialize game
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -27,7 +32,7 @@ running = True
 # Create the initial population of Perceptrons and cars
 population = [
     {
-        "perceptron": Perceptron(input_size=6, hidden_size=6, output_size=2),
+        "perceptron": Perceptron(input_size=6, hidden_size=HIDDEN_LAYER_SIZE, output_size=2),
         "car": Car(None, checkpoints, color=random.choice([RED, GREEN, BLUE]))
     }
     for _ in range(POPULATION_SIZE)
@@ -58,7 +63,7 @@ def mutate_population():
         for individual in population
     ]
     for individual in population:
-        individual["perceptron"].mutate(MUTATION_RATE)
+        individual["perceptron"].mutate(MUTATION_RATE, MUTATION_MODULUS)
 
     # Reevaluate fitness after mutation
     evaluate_population()
@@ -75,7 +80,7 @@ def breed_population():
     population.sort(key=lambda ind: ind["car"].fitness, reverse=True)
 
     # Select the top 5 fittest
-    top_fittest = population[:5]
+    top_fittest = population[:TOP_SCORES_TO_CONSERVE]
 
     # Create new population
     new_population = []
@@ -84,12 +89,12 @@ def breed_population():
     new_population.extend(top_fittest)
 
     # Create 10 pairwise crossovers between the top 5
-    for i in range(5):
-        for j in range(i + 1, 5):
+    for i in range(BREEDING_NUM):
+        for j in range(i + 1, BREEDING_NUM):
             parent1 = top_fittest[i]["perceptron"]
             parent2 = top_fittest[j]["perceptron"]
             child_perceptron = Perceptron.crossover(parent1, parent2)
-            child_perceptron.mutate(MUTATION_RATE)
+            child_perceptron.mutate(MUTATION_RATE, MUTATION_MODULUS)
             new_population.append({
                 "perceptron": child_perceptron,
                 "car": Car(None, checkpoints, color=random.choice([RED, GREEN, BLUE]))
@@ -98,7 +103,7 @@ def breed_population():
     # Add 5 new random individuals
     while len(new_population) < POPULATION_SIZE:
         new_population.append({
-            "perceptron": Perceptron(input_size=6, hidden_size=6, output_size=2),
+            "perceptron": Perceptron(input_size=6, hidden_size=HIDDEN_LAYER_SIZE, output_size=2),
             "car": Car(None, checkpoints, color=random.choice([RED, GREEN, BLUE]))
         })
 
@@ -121,7 +126,7 @@ while running:
     # Check if all cars have stopped running
     if all(not individual["car"].running for individual in population):
 
-        if generation % 10 == 0:
+        if generation % BREED_EVERY == 0:
             breed_population()
         else:
             mutate_population()

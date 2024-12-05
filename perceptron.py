@@ -50,7 +50,7 @@ class Perceptron:
         child.output_bias = (parent1.output_bias + parent2.output_bias) / 2
         return child
 
-    def mutate(self, mutation_rate=0.1):
+    def mutate(self, mutation_rate=0.1, mutation_modulus=0.5):
         """
         Mutate the perceptron's weights and biases.
 
@@ -60,20 +60,20 @@ class Perceptron:
         for i in range(self.input_to_hidden.shape[0]):
             for j in range(self.input_to_hidden.shape[1]):
                 if np.random.uniform(0, 1) < mutation_rate:
-                    self.input_to_hidden[i, j] += np.random.uniform(-0.5, 0.5)
+                    self.input_to_hidden[i, j] += np.random.uniform(-mutation_modulus, mutation_modulus)
 
         for i in range(self.hidden_to_output.shape[0]):
             for j in range(self.hidden_to_output.shape[1]):
                 if np.random.uniform(0, 1) < mutation_rate:
-                    self.hidden_to_output[i, j] += np.random.uniform(-0.5, 0.5)
+                    self.hidden_to_output[i, j] += np.random.uniform(-mutation_modulus, mutation_modulus)
 
         for i in range(self.hidden_bias.shape[0]):
             if np.random.uniform(0, 1) < mutation_rate:
-                self.hidden_bias[i] += np.random.uniform(-0.5, 0.5)
+                self.hidden_bias[i] += np.random.uniform(-mutation_modulus, mutation_modulus)
 
         for i in range(self.output_bias.shape[0]):
             if np.random.uniform(0, 1) < mutation_rate:
-                self.output_bias[i] += np.random.uniform(-0.5, 0.5)
+                self.output_bias[i] += np.random.uniform(-mutation_modulus, mutation_modulus)
 
     def copy(self):
         """
