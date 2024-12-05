@@ -37,13 +37,14 @@ while running:
     for car in cars:
         car.update(random.randint(-1, 1), random.randint(-1, 1))
 
-    # Write player current score in the top left
+    #write player current score in the top left
     font = pygame.font.Font(None, 36)
-    message = (f"Score: {playerCar.checkpoints_reached} | "
-               f"Time: {playerCar.time_alive/FPS:.2f} | "
-               f"Max Score: {playerCar.max_score}")
-    text = font.render(message, True, BLUE)
-    screen.blit(text, (10, 10))
+    message_top = f"Current Lap Time {playerCar.lap_time/FPS:.3f} | Score: {playerCar.checkpoints_reached} | Race Time: {playerCar.time_alive/FPS:.1f}"
+    text_top = font.render(message_top, True, BLUE)
+    screen.blit(text_top, (10, 10))
+    message_bottom = f"Last Lap Time: {playerCar.last_lap_time/FPS:.3f} | Max Score: {playerCar.max_score} | Best Lap Time: {playerCar.min_lap_time/FPS:.3f}"
+    text_bottom = font.render(message_bottom, True, BLUE)
+    screen.blit(text_bottom, (10, 50))
 
     # Update display
     pygame.display.flip()
