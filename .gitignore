@@ -1,0 +1,3 @@
+# Ignore Pyenv stuff
+env/*
+__pycache__/*
