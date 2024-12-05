@@ -15,16 +15,14 @@ clock = pygame.time.Clock()
 FPS = 60
 running = True
 
-playerCar = Car(102, checkpoints)
-aiCar = Car(102, checkpoints, color=RED)
+playerCar = Car(102, checkpoints, training_mode=False)
+aiCar = Car(102, checkpoints, color=RED, training_mode=False)
 aiPerceptron = Perceptron(input_size=6, hidden_size=6, output_size=2)
-aiPerceptron.load_perceptron("best_perceptron.json.npz")
+aiPerceptron.load_perceptron("safe_perceptron.npz")
+
+cars = [playerCar, aiCar]
 
 while running:
-    #hardcoded way to keep it always running
-    aiCar.running = True
-    playerCar.running = True
-
     screen.fill(BLACK)
     screen.blit(path_img, (0, 0))
 
@@ -46,14 +44,16 @@ while running:
     turn, accel = aiPerceptron.forward(inputs)
     aiCar.update(turn=int(np.sign(turn)), accel=int(np.sign(accel)))
 
-    #write player current score in the top left
-    font = pygame.font.Font(None, 36)
-    message_top = f"Current Lap Time {playerCar.lap_time/FPS:.3f} | Score: {playerCar.checkpoints_reached} | Race Time: {playerCar.time_alive/FPS:.1f}"
-    text_top = font.render(message_top, True, BLUE)
-    screen.blit(text_top, (10, 10))
-    message_bottom = f"Last Lap Time: {playerCar.last_lap_time/FPS:.3f} | Max Score: {playerCar.max_score} | Best Lap Time: {playerCar.min_lap_time/FPS:.3f}"
-    text_bottom = font.render(message_bottom, True, BLUE)
-    screen.blit(text_bottom, (10, 50))
+    anchor = 0
+    for car in cars:
+        font = pygame.font.Font(None, 36)
+        message_top = f"Lap Time {car.lap_time/FPS:.3f} | Race Time: {car.time_alive/FPS:.1f} | Lap: {car.lap_count}"
+        message_bottom = f"Last Lap Time: {car.last_lap_time/FPS:.3f} | Best Lap Time: {car.min_lap_time/FPS:.3f}"
+        text_top = font.render(message_top, True, car.color)
+        text_bottom = font.render(message_bottom, True, car.color)
+        screen.blit(text_top, (10  + 1000*anchor, 10))
+        screen.blit(text_bottom, (10 + 1000*anchor, 50))
+        anchor += 1
 
     # Update display
     pygame.display.flip()

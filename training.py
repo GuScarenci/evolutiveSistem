@@ -131,7 +131,6 @@ while running:
     
     # Check if all cars have stopped running
     if all(not individual["car"].running for individual in population):
-
         if generation % BREED_EVERY == 0:
             breed_population()
         else:

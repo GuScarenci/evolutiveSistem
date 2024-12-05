@@ -25,22 +25,24 @@ car_img  = pygame.transform.scale(car_img, (30, 30))
 
 class Car:
     def __init__(self, checkpoint_, checkpoints, angle=-90, 
-                 speed=0, car_img=car_img, color=BLUE):
+                 speed=0, car_img=car_img, color=BLUE, training_mode = True):
         self.start_checkpoint = checkpoint_ - 1 if checkpoint_ is not None else None
         self.checkpoints = checkpoints
         self.start_angle = angle
         self.start_speed = speed
         self.color = color
         self.image = car_img
+        self.training_mode = training_mode
 
         self.rotation_speed = 2
-        self.max_speed = 5
+        self.max_speed = 7
         self.acceleration = 0.05
         self.deceleration = 0.1
         self.hitbox = (25, 20)
         self.max_ray_length = 110
         self.max_frames_to_reach_checkpoint = 100
         self.ray_angles = [-90, -45, 0, 45, 90, 180]
+        self.max_laps_in_training = 2
 
         self.max_score = 0
         self.min_lap_time = 0
@@ -62,8 +64,10 @@ class Car:
         self.time_alive = 0
         self.checkpoints_reached = 0
         self.lap_time = 0
+        self.lap_count = 0
         self.frames_since_last_checkpoint = 0
         self.ray_distances = [0] * len(self.ray_angles)
+        self.ray_points = [(0, 0)] * len(self.ray_angles)
 
         self.running = True
 
@@ -107,26 +111,42 @@ class Car:
         self.time_alive += 1
         self.lap_time += 1
 
-        self.fitness = self.checkpoints_reached * 500 + self.time_alive/10
+        self.fitness = self.checkpoints_reached * 500
 
-        timeout = self.frames_since_last_checkpoint > self.max_frames_to_reach_checkpoint
-        if not self.is_on_path() or timeout:
+        timeout = False
+        race_done = False
+        if self.training_mode:
+            timeout = self.frames_since_last_checkpoint > self.max_frames_to_reach_checkpoint
+            race_done = self.lap_count >= self.max_laps_in_training
+            if race_done:
+                self.fitness = self.checkpoints_reached * 500 + 1/(self.time_alive) * self.max_laps_in_training * 20 * self.checkpoints_reached
+
+        if not self.is_on_path() or timeout or race_done:
             self.die()
 
     def draw(self):
-        custom_hitbox = pygame.Rect(0, 0, self.hitbox[0], self.hitbox[1])
-        custom_hitbox.center = self.rect.center
-        pygame.draw.rect(screen, self.color, custom_hitbox, 2)
-
         rotated_car = pygame.transform.rotate(self.image, self.angle)
         self.rect = rotated_car.get_rect(center=(self.x, self.y))
         screen.blit(rotated_car, self.rect.topleft)
 
-        # write fitness score next to the car
+        if not self.training_mode:
+            font = pygame.font.Font(None, 36)
+            message = f"{self.speed:.2f}"
+            text = font.render(message, True, BLACK)
+            screen.blit(text, (self.x, self.y))
+            return
+        
+        custom_hitbox = pygame.Rect(0, 0, self.hitbox[0], self.hitbox[1])
+        custom_hitbox.center = self.rect.center
+        pygame.draw.rect(screen, self.color, custom_hitbox, 2)
+
         font = pygame.font.Font(None, 36)
         message = f"{self.fitness:.0f}"
         text = font.render(message, True, BLACK)
         screen.blit(text, (self.x, self.y))
+
+        for point in self.ray_points:
+            pygame.draw.line(screen, self.color, (self.x, self.y), point, 1)
 
 
     def is_on_path(self):
@@ -158,16 +178,19 @@ class Car:
                     self.min_lap_time = min(self.min_lap_time, self.lap_time) if self.min_lap_time != 0 else self.lap_time
                     self.last_lap_time = self.lap_time
                     self.lap_time = 0
+                    self.lap_count += 1
                 self.frames_since_last_checkpoint = 0
                 self.checkpoints_reached += 1
                 self.next_checkpoint += 1
                 if self.next_checkpoint == len(self.checkpoints):
                     self.next_checkpoint = 0
 
-                pygame.draw.polygon(screen, self.color, rect_points, 15)
+                if self.training_mode:
+                    pygame.draw.polygon(screen, self.color, rect_points, 15)
 
     def cast_rays(self):
         self.ray_distances = []
+        self.ray_points = []
         for angle_offset in self.ray_angles:
             ray_angle = self.angle + angle_offset
             distance = 0
@@ -187,7 +210,7 @@ class Car:
                 distance = -1
 
             self.ray_distances.append(distance)
-            pygame.draw.line(screen, self.color, (self.x, self.y), (ray_x, ray_y), 1)
+            self.ray_points.append((ray_x, ray_y))
 
     def copy(self):
         """
