@@ -15,6 +15,7 @@ BREEDING_NUM = 5
 TOP_SCORES_TO_CONSERVE = 35
 BREED_EVERY = 5
 HIDDEN_LAYER_SIZE = 6
+CHECKPOINT = 102
 
 # Load checkpoints
 with open("checkpoints.json", "r") as file:
@@ -33,7 +34,7 @@ running = True
 population = [
     {
         "perceptron": Perceptron(input_size=6, hidden_size=HIDDEN_LAYER_SIZE, output_size=2),
-        "car": Car(0, checkpoints, color=random.choice([RED, GREEN, BLUE]))
+        "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
     }
     for _ in range(POPULATION_SIZE)
 ]
@@ -54,7 +55,8 @@ def evaluate_population():
 
 def mutate_population():
     """Mutate the population and rollback if fitness decreases."""
-    global previous_population = [
+    global previous_population
+    previous_population = [
         {
             "perceptron": individual["perceptron"].copy(),
             "car": individual["car"].copy()
@@ -90,14 +92,14 @@ def breed_population():
             child_perceptron.mutate(MUTATION_RATE, MUTATION_MODULUS)
             new_population.append({
                 "perceptron": child_perceptron,
-                "car": Car(0, checkpoints, color=random.choice([RED, GREEN, BLUE]))
+                "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
             })
 
     # Add 5 new random individuals
     while len(new_population) < POPULATION_SIZE:
         new_population.append({
             "perceptron": Perceptron(input_size=6, hidden_size=HIDDEN_LAYER_SIZE, output_size=2),
-            "car": Car(0, checkpoints, color=random.choice([RED, GREEN, BLUE]))
+            "car": Car(None, checkpoints, color=random.choice([RED, GREEN, BLUE]))
         })
 
     population = new_population
