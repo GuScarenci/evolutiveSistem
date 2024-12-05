@@ -74,39 +74,33 @@ def mutate_population():
 def breed_population():
     """Make the best individual the parent of all others and create the next generation."""
     global population
-    gene_pool = population + previous_population
+    gene_pool = previous_population + population
     gene_pool.sort(key=lambda ind: ind["car"].fitness, reverse=True)
-    
-    # Find the best individual (highest fitness)
-    best_individual = gene_pool[0]
-    gene_pool = gene_pool[1: POPULATION_SIZE]
-    best_perceptron = best_individual["perceptron"]
-    
-    # Create new population with the best individual as parent
-    new_population = []
-    
-    # Keep the best individual as-is (no crossover or mutation)
-    new_population.append({
-        "perceptron": best_perceptron.copy(),
-        "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
-    })
 
-    # Create the rest of the population by crossing over the best individual with others
-    for individual in gene_pool: 
-        # Perform crossover between the best individual and the random individual
-        child_perceptron = Perceptron.crossover(best_perceptron, individual['perceptron'])
-        
-        # Optionally, you can mutate the child perceptron to maintain genetic diversity
-        child_perceptron.mutate(MUTATION_RATE / 5, MUTATION_MODULUS / 2)
-        
-        # Add the child to the new population
+    # Create new population
+    new_population = gene_pool[:TOP_SCORES_TO_CONSERVE]
+    top_fittest = gene_pool[:BREEDING_NUM]
+
+    # Create 10 pairwise crossovers between the top 5
+    for i in range(BREEDING_NUM):
+        for j in range(i + 1, BREEDING_NUM):
+            parent1 = top_fittest[i]["perceptron"]
+            parent2 = top_fittest[j]["perceptron"]
+            child_perceptron = Perceptron.crossover(parent1, parent2)
+            child_perceptron.mutate(MUTATION_RATE/5, MUTATION_MODULUS/2)
+            new_population.append({
+                "perceptron": child_perceptron,
+                "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
+            })
+
+    # Add new random individuals
+    while len(new_population) < POPULATION_SIZE:
         new_population.append({
-            "perceptron": child_perceptron,
+            "perceptron": Perceptron(input_size=6, hidden_size=HIDDEN_LAYER_SIZE, output_size=2),
             "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
         })
 
     population = new_population
-    len(population)
 
 previous_generation_best_fitness = 0
 best_fitness = 0
