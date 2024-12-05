@@ -34,7 +34,7 @@ running = True
 population = [
     {
         "perceptron": Perceptron(input_size=6, hidden_size=HIDDEN_LAYER_SIZE, output_size=2),
-        "car": Car(CHECKPONIT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
+        "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
     }
     for _ in range(POPULATION_SIZE)
 ]
@@ -98,14 +98,14 @@ def breed_population():
             child_perceptron.mutate(MUTATION_RATE, MUTATION_MODULUS)
             new_population.append({
                 "perceptron": child_perceptron,
-                "car": Car(CHECKPONIT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
+                "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
             })
 
     # Add 5 new random individuals
     while len(new_population) < POPULATION_SIZE:
         new_population.append({
             "perceptron": Perceptron(input_size=6, hidden_size=HIDDEN_LAYER_SIZE, output_size=2),
-            "car": Car(CHECKPONIT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
+            "car": Car(CHECKPOINT, checkpoints, color=random.choice([RED, GREEN, BLUE]))
         })
 
     population = new_population
