@@ -26,16 +26,15 @@ path_img = pygame.transform.scale(path_img, (WIDTH, HEIGHT))  # Scale to fit scr
 
 class Car:
     def __init__(self, checkpoint_, checkpoints, angle=90, speed=0, car_img='car.png', color=BLUE):
-        checkpoint = checkpoints[checkpoint_-1]["rectangle"]
+        self.start_checkpoint = checkpoint_ -1
+        checkpoint = checkpoints[self.start_checkpoint]["rectangle"]
+        self.start_X = sum(x for x, y in checkpoint) / 4
+        self.start_Y = sum(y for x, y in checkpoint) / 4
         self.checkpoints = checkpoints
-        x = sum(x for x, y in checkpoint) / 4
-        y = sum(y for x, y in checkpoint) / 4
-        self.start_X = x
-        self.start_Y = y
         self.start_angle = angle
         self.start_speed = speed
+        self.image = pygame.image.load(car_img)  # Replace with your car image
 
-        self.max_frames_to_reach_checkpoint = 300
         self.rotation_speed = 2
         self.max_speed = 5
         self.acceleration = 0.05
@@ -43,7 +42,6 @@ class Car:
         self.hitbox = (25, 20)
         self.max_ray_length = 300
         self.ray_angles = [-90, -45, 0, 45, 90, 180]
-        self.image = pygame.image.load(car_img)  # Replace with your car image
         self.image = pygame.transform.scale(self.image, (30, 30))  # Resize car
 
         self.color = color
@@ -55,7 +53,9 @@ class Car:
         self.y = self.start_Y
         self.angle = self.start_angle
         self.speed = self.start_speed
+        self.next_checkpoint = self.start_checkpoint+1
         self.checkpoints_reached = 0
+        self.max_frames_to_reach_checkpoint = 300
         self.frames_since_last_checkpoint = 0
         self.rect = self.image.get_rect(center=(self.x, self.y))
         self.ray_distances = [0] * len(self.ray_angles)
