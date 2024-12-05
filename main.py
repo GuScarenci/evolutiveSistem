@@ -45,28 +45,17 @@ def is_point_inside_checkpoint(checkpoints, checkpoint_number, point):
     # If checkpoint number is not found, raise an error
     raise ValueError(f"Checkpoint {checkpoint_number} not found in the JSON file.")
 
-json_file_path = "checkpoints.json"  # Replace with your JSON file path
+json_file_path = "checkpoints.json"
 checkpoints = load_checkpoints(json_file_path)
 current_checkpoint = 27
 checkpoints_reached = 0
 max_frames_to_reach_checkpoint = 300
 frames_since_last_checkpoint = 0
 
-# Genetic Algorithm parameters
-#POPULATION_SIZE = 5
-#MUTATION_RATE = 0.1
-#population = [NeuralNetwork(input_size=4, hidden_size=6, output_size=2) for _ in range(POPULATION_SIZE)]
-#scores = [0] * POPULATION_SIZE
-#current_ai = 0
-
-# Initialize Pygame
 pygame.init()
-
-# Main game loop
 running = True
 
 playerCar = Car(64, checkpoints)
-
 cars = [Car(27, checkpoints, color=RED), Car(28, checkpoints, color=GREEN)]
 
 while running:
@@ -87,15 +76,8 @@ while running:
 
     for car in cars:
         car.update(random.randint(-1, 1), random.randint(-1, 1))
-        car.cast_rays(path_img)
-        if not car.is_on_path(path_img):
-            car.running = False
-            car.draw()
 
     playerCar.update(turn, accel)
-    playerCar.cast_rays(path_img)
-    if not playerCar.is_on_path(path_img):
-        playerCar.running = False
         
     # Update display
     pygame.display.flip()

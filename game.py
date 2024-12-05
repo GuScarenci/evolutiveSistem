@@ -21,15 +21,11 @@ GREEN = (0, 255, 0)
 clock = pygame.time.Clock()
 FPS = 60
 
-# Load assets
-car_img = pygame.image.load("car.png")  # Replace with your car image
-car_img = pygame.transform.scale(car_img, (30, 30))  # Resize car
 path_img = pygame.image.load("track.png")  # Replace with your path image
 path_img = pygame.transform.scale(path_img, (WIDTH, HEIGHT))  # Scale to fit screen
 
-
 class Car:
-    def __init__(self, checkpoint_, checkpoints, angle=90, speed=0, color=BLUE):
+    def __init__(self, checkpoint_, checkpoints, angle=90, speed=0, car_img='car.png', color=BLUE):
         checkpoint = checkpoints[checkpoint_-1]["rectangle"]
         self.checkpoints = checkpoints
         x = sum(x for x, y in checkpoint) / 4
@@ -47,8 +43,9 @@ class Car:
         self.hitbox = (25, 20)
         self.max_ray_length = 300
         self.ray_angles = [-90, -45, 0, 45, 90, 180]
+        self.image = pygame.image.load(car_img)  # Replace with your car image
+        self.image = pygame.transform.scale(self.image, (30, 30))  # Resize car
 
-        self.image = car_img
         self.color = color
 
         self.reset()
@@ -73,6 +70,7 @@ class Car:
             accel (int): 1 for acceleration, 0 for no acceleration, -1 for braking
         """
         if not self.running:
+            self.draw()
             return
 
         # Handle turning
@@ -98,6 +96,11 @@ class Car:
 
         # Update rectangle position
         self.draw()
+        self.cast_rays()
+
+        if not self.is_on_path():
+            self.running = False
+
 
     def draw(self):
         custom_hitbox = pygame.Rect(0, 0, self.hitbox[0], self.hitbox[1])
@@ -108,7 +111,7 @@ class Car:
         self.rect = rotated_car.get_rect(center=(self.x, self.y))
         screen.blit(rotated_car, self.rect.topleft)
 
-    def is_on_path(self, path_img):
+    def is_on_path(self):
         points_to_check = [
             (self.x - self.hitbox[0] // 2, self.y - self.hitbox[1] // 2),
             (self.x + self.hitbox[0] // 2, self.y - self.hitbox[1] // 2),
@@ -122,7 +125,7 @@ class Car:
                     return False
         return True
     
-    def cast_rays(self, path_img):
+    def cast_rays(self):
         """
         Casts rays in predefined directions and calculates the distance to the nearest non-white pixel.
         """
