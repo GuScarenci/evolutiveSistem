@@ -41,43 +41,89 @@ ai_car_angle = 0
 time_alive = 0
 max_speed = 5
 
-
 class Car:
-    def __init__(self, neural_net, x, y):
-        self.neural_net = neural_net
-        self.x = x
-        self.y = y
-        self.speed = 0
-        self.angle = 0
-        self.time_alive = 0
+    def __init__(self, x, y, angle=0, speed=0, color=RED):
+        self.start_X = x
+        self.start_Y = y
+        self.start_angle = angle
+        self.start_speed = speed
 
-    def reset(self, x, y):
-        self.x = x
-        self.y = y
-        self.speed = 0
-        self.angle = 0
-        self.time_alive = 0
+        self.rotation_speed = 2
+        self.max_speed = 5
+        self.acceleration = 0.05
+        self.deceleration = 0.1
+        self.hitbox = (25, 20)
 
-    def update(self):
-        sensor_data = get_sensor_data(self.x, self.y, self.angle)
-        sensor_data = np.array(sensor_data + [self.speed])
-        outputs = self.neural_net.forward(sensor_data)
-        turn, accelerate = outputs
-        self.angle += turn * 5
-        self.speed = min(max(self.speed + accelerate * 0.2, -max_speed / 2), max_speed)
+        self.image = car_img
+        self.color = color
+
+        self.reset()
+
+    def reset(self):
+        self.x = self.start_X
+        self.y = self.start_Y
+        self.angle = self.start_angle
+        self.speed = self.start_speed
+        self.rect = self.image.get_rect(center=(self.x, self.y))
+        self.running = True
+
+    def update(self, turn=0, accelerate=False, brake=False):
+        """
+        Update the car's state.
+        
+        Args:
+            turn (int): -1 for left, 1 for right, 0 for no turning.
+            accelerate (bool): True to accelerate, False otherwise.
+            brake (bool): True to brake, False otherwise.
+        """
+        if not self.running:
+            return
+
+        # Handle turning
+        if turn == -1:  # Turn left
+            self.angle += self.rotation_speed
+        elif turn == 1:  # Turn right
+            self.angle -= self.rotation_speed
+
+        # Handle acceleration and braking
+        if accelerate:
+            self.speed = min(self.speed + self.acceleration, self.max_speed)
+        elif brake:
+            if self.speed > 0:
+                self.speed = max(self.speed - self.deceleration, -self.max_speed / 2)
+            else:
+                self.speed = max(self.speed - self.acceleration, -self.max_speed / 2)
+        else:
+            self.speed *= 0.99  # Natural deceleration
+
+        # Update position
         self.x -= self.speed * math.sin(math.radians(self.angle))
         self.y -= self.speed * math.cos(math.radians(self.angle))
-        self.time_alive += 1
-        rotated_car = pygame.transform.rotate(car_img, self.angle)
-        car_rect = rotated_car.get_rect(center=(self.x, self.y))
-        screen.blit(rotated_car, car_rect.topleft)
-        return car_rect
 
-    def is_on_path(self):
-        if 0 <= self.x < WIDTH and 0 <= self.y < HEIGHT:
-            pixel_color = path_img.get_at((int(self.x), int(self.y)))
-            if pixel_color != WHITE:
-                return False
+        # Update rectangle position
+        self.draw()
+
+    def draw(self):
+        custom_hitbox = pygame.Rect(0, 0, self.hitbox[0], self.hitbox[1])
+        custom_hitbox.center = self.rect.center
+        pygame.draw.rect(screen, self.color, custom_hitbox, 2)
+
+        rotated_car = pygame.transform.rotate(self.image, self.angle)
+        self.rect = rotated_car.get_rect(center=(self.x, self.y))
+        screen.blit(rotated_car, self.rect.topleft)
+
+    def is_on_path(self, path_img):
+        points_to_check = [
+            (self.x - self.hitbox[0] // 2, self.y - self.hitbox[1] // 2),
+            (self.x + self.hitbox[0] // 2, self.y - self.hitbox[1] // 2),
+            (self.x + self.hitbox[0] // 2, self.y + self.hitbox[1] // 2),
+            (self.x - self.hitbox[0] // 2, self.y + self.hitbox[1] // 2)
+        ]
+
+        for point in points_to_check:
+            if 0 <= point[0] < WIDTH and 0 <= point[1] < HEIGHT:
+                if path_img.get_at((int(point[0]), int(point[1]))) != WHITE:
+                    return False
         return True
 
 

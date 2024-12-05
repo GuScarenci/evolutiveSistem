@@ -45,19 +45,22 @@ def is_point_inside_checkpoint(checkpoints, checkpoint_number, point):
     # If checkpoint number is not found, raise an error
     raise ValueError(f"Checkpoint {checkpoint_number} not found in the JSON file.")
 
-# Initialize Pygame
-pygame.init()
-
-# Main game loop
-running = True
-reset_ai_car()
-
 json_file_path = "checkpoints.json"  # Replace with your JSON file path
 checkpoints = load_checkpoints(json_file_path)
 current_checkpoint = 27
 checkpoints_reached = 0
 max_frames_to_reach_checkpoint = 300
 frames_since_last_checkpoint = 0
+
+# Initialize Pygame
+pygame.init()
+
+# Main game loop
+running = True
+
+playerCar = Car(WIDTH // 2, HEIGHT - 400, color=BLUE)
+
+cars = [Car(WIDTH //2 - 30, HEIGHT - 400, color=RED), Car(WIDTH //2 + 30, HEIGHT - 400, color=GREEN)]
 
 while running:
     screen.fill(BLACK)
@@ -68,36 +71,25 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Update AI car
-    car_rect = update_ai_car()
+    if pygame.key.get_pressed()[pygame.K_r]:
+        playerCar.reset()
 
-    # Check if AI car dies
-    if not is_car_on_path([
-        car_rect.topleft, car_rect.topright, car_rect.bottomleft, car_rect.bottomright
-    ]) or frames_since_last_checkpoint > max_frames_to_reach_checkpoint:
-        scores[current_ai] = checkpoints_reached/time_alive + time_alive
-        frames_since_last_checkpoint = 0
-        current_ai += 1
-        if current_ai >= POPULATION_SIZE:
-            evolve_population()
-            current_ai = 0
-        current_checkpoint = 27
-        checkpoints_reached = 0
-        reset_ai_car()
+    keys = pygame.key.get_pressed()
+    turn = -1 if keys[pygame.K_a] else 1 if keys[pygame.K_d] else 0
+    accelerate = keys[pygame.K_w]
+    brake = keys[pygame.K_s]
 
-    car_inside_checkpoint = is_point_inside_checkpoint(checkpoints, current_checkpoint, car_rect.topleft) or is_point_inside_checkpoint(checkpoints, current_checkpoint, car_rect.topright) or is_point_inside_checkpoint(checkpoints, current_checkpoint, car_rect.bottomleft) or is_point_inside_checkpoint(checkpoints, current_checkpoint, car_rect.bottomright)
+    for car in cars:
+        car.update(random.randint(-1, 1), random.choice([True, False]), random.choice([True, False]))
+        if not car.is_on_path(path_img):
+            car.running = False
+        else:
+            car.draw()
 
-    if car_inside_checkpoint:
-        print(f"AI car reached checkpoint {current_checkpoint}")
-        frames_since_last_checkpoint = 0
-        checkpoints_reached += 1
-        current_checkpoint += 1
-        if current_checkpoint > len(checkpoints):
-            current_checkpoint = 1
-
-    # Update score for current AI
-    time_alive += 1
-    frames_since_last_checkpoint += 1
+    playerCar.update(turn, accelerate, brake)
+    if not playerCar.is_on_path(path_img):
+        playerCar.running = False
+        
 
     # Update display
     pygame.display.flip()
