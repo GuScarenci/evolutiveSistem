@@ -26,7 +26,7 @@ for idx, contour in enumerate(contours):
 checkpoint_image = image.copy()
 
 # Number of checkpoints
-num_checkpoints = 300
+num_checkpoints = 200
 
 # Calculate cumulative arc lengths along the outer contour
 outer_length = cv2.arcLength(outer_contour, True)
@@ -54,21 +54,31 @@ def interpolate_along_contour(contour, distances):
 
 evenly_spaced_points = interpolate_along_contour(outer_contour, distances)
 
-# Function to find the closest point on the inner contour to a given point
-def find_closest_point(point, contour):
+# Function to find the closest point on the inner contour to a given point, ensuring non-overlap
+used_inner_points = []
+
+def find_closest_non_overlapping_point(point, contour, min_distance=10):
     min_dist = float('inf')
     closest_point = None
     for cpt in contour:
-        dist = np.linalg.norm(np.array(point) - np.array(cpt[0]))
-        if dist < min_dist:
+        cpt_point = cpt[0]
+        dist = np.linalg.norm(np.array(point) - np.array(cpt_point))
+        if dist < min_dist and all(np.linalg.norm(np.array(cpt_point) - np.array(p)) > min_distance for p in used_inner_points):
             min_dist = dist
-            closest_point = cpt[0]
+            closest_point = cpt_point
+    if closest_point is not None:
+        used_inner_points.append(closest_point)
     return closest_point
 
 # Draw checkpoints from the outer to the inner contour and enumerate them
 for idx, outer_point in enumerate(evenly_spaced_points):
     outer_point = tuple(outer_point)
-    inner_point = tuple(map(int, find_closest_point(outer_point, inner_contour)))
+    inner_point = find_closest_non_overlapping_point(outer_point, inner_contour)
+    
+    if inner_point is None:
+        continue  # Skip if no valid inner point is found
+
+    inner_point = tuple(map(int, inner_point))
     
     # Draw the checkpoint line
     cv2.line(checkpoint_image, outer_point, inner_point, (255, 0, 0), 2)
@@ -78,5 +88,5 @@ for idx, outer_point in enumerate(evenly_spaced_points):
     cv2.putText(checkpoint_image, str(idx + 1), midpoint, cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
 
 # Save the result
-output_path = 'track_with_numbered_checkpoints_fixed.png'
+output_path = 'track_with_numbered_checkpoints_non_overlapping.png'
 cv2.imwrite(output_path, checkpoint_image)
