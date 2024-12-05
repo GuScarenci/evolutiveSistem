@@ -107,7 +107,7 @@ class Car:
         self.time_alive += 1
         self.lap_time += 1
 
-        self.fitness = self.checkpoints_reached * 1000 + self.time_alive/60
+        self.fitness = self.checkpoints_reached * 500 + self.time_alive/5
 
         timeout = self.frames_since_last_checkpoint > self.max_frames_to_reach_checkpoint
         if not self.is_on_path() or timeout:
