@@ -115,7 +115,7 @@ class Car:
         self.time_alive += 1
         self.lap_time += 1
 
-        self.fitness = self.checkpoints_reached * 1000 + self.time_alive
+        self.fitness = self.checkpoints_reached * 1000 + self.time_alive*self.checkpoints_reached
 
         timeout = self.frames_since_last_checkpoint > self.max_frames_to_reach_checkpoint
         if not self.is_on_path() or timeout:
@@ -151,7 +151,10 @@ class Car:
         points = [self.rect.topleft, self.rect.topright, self.rect.bottomleft, self.rect.bottomright]
 
         for point in points:
-            rectangle = self.checkpoints[self.next_checkpoint]["rectangle"]
+            try:
+                rectangle = self.checkpoints[self.next_checkpoint]["rectangle"]
+            except IndexError:
+                print("IndexError: Checkpoints list is empty.")
             rect_points = np.array(rectangle, dtype=np.int32)
             inside = cv2.pointPolygonTest(rect_points, point, False)
 
@@ -163,7 +166,7 @@ class Car:
                 self.frames_since_last_checkpoint = 0
                 self.checkpoints_reached += 1
                 self.next_checkpoint += 1
-                if self.next_checkpoint >= len(self.checkpoints):
+                if self.next_checkpoint == len(self.checkpoints):
                     self.next_checkpoint = 0
 
                 #show checkpoint reached
