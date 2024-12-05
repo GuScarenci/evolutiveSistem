@@ -65,9 +65,9 @@ pygame.init()
 # Main game loop
 running = True
 
-playerCar = Car(WIDTH // 2, HEIGHT - 400, color=BLUE)
+playerCar = Car(64, checkpoints)
 
-cars = [Car(WIDTH //2 - 30, HEIGHT - 400, color=RED), Car(WIDTH //2 + 30, HEIGHT - 400, color=GREEN)]
+cars = [Car(27, checkpoints, color=RED), Car(28, checkpoints, color=GREEN)]
 
 while running:
     screen.fill(BLACK)
