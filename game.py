@@ -3,9 +3,7 @@ import sys
 import math
 import numpy as np
 import random
-
-# Initialize Pygame
-pygame.init()
+from perceptron import *
 
 # Screen dimensions
 WIDTH, HEIGHT = 1920, 1080
@@ -29,20 +27,19 @@ car_img = pygame.transform.scale(car_img, (30, 30))  # Resize car
 path_img = pygame.image.load("track.png")  # Replace with your path image
 path_img = pygame.transform.scale(path_img, (WIDTH, HEIGHT))  # Scale to fit screen
 
-# Neural Network Class
-class NeuralNetwork:
-    def __init__(self, input_size, hidden_size, output_size):
-        # Initialize weights
-        self.input_to_hidden = np.random.uniform(-1, 1, (input_size, hidden_size))
-        self.hidden_to_output = np.random.uniform(-1, 1, (hidden_size, output_size))
-        self.hidden_bias = np.zeros(hidden_size)
-        self.output_bias = np.zeros(output_size)
+# Genetic Algorithm parameters
+POPULATION_SIZE = 10
+MUTATION_RATE = 0.1
+population = [NeuralNetwork(input_size=4, hidden_size=6, output_size=2) for _ in range(POPULATION_SIZE)]
+scores = [0] * POPULATION_SIZE
+current_ai = 0
 
-    def forward(self, inputs):
-        # Forward pass
-        hidden_layer = np.tanh(np.dot(inputs, self.input_to_hidden) + self.hidden_bias)
-        output_layer = np.tanh(np.dot(hidden_layer, self.hidden_to_output) + self.output_bias)
-        return output_layer
+# Game variables
+ai_car_x, ai_car_y = WIDTH // 2, HEIGHT - 400
+ai_car_speed = 0
+ai_car_angle = 0
+time_alive = 0
+max_speed = 5
 
 # Genetic Algorithm functions
 def crossover(parent1, parent2):
@@ -121,54 +118,3 @@ def update_ai_car():
     car_rect = rotated_car.get_rect(center=(ai_car_x, ai_car_y))
     screen.blit(rotated_car, car_rect.topleft)
     return car_rect
-
-# Genetic Algorithm parameters
-POPULATION_SIZE = 10
-MUTATION_RATE = 0.1
-population = [NeuralNetwork(input_size=4, hidden_size=6, output_size=2) for _ in range(POPULATION_SIZE)]
-scores = [0] * POPULATION_SIZE
-current_ai = 0
-
-# Game variables
-ai_car_x, ai_car_y = WIDTH // 2, HEIGHT - 400
-ai_car_speed = 0
-ai_car_angle = 0
-time_alive = 0
-max_speed = 5
-
-# Main game loop
-running = True
-reset_ai_car()
-
-while running:
-    screen.fill(BLACK)
-    screen.blit(path_img, (0, 0))
-
-    # Event handling
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-    # Update AI car
-    car_rect = update_ai_car()
-
-    # Check if AI car dies
-    if not is_car_on_path([
-        car_rect.topleft, car_rect.topright, car_rect.bottomleft, car_rect.bottomright
-    ]):
-        scores[current_ai] = time_alive
-        current_ai += 1
-        if current_ai >= POPULATION_SIZE:
-            evolve_population()
-            current_ai = 0
-        reset_ai_car()
-
-    # Update score for current AI
-    time_alive += 1
-
-    # Update display
-    pygame.display.flip()
-    clock.tick(FPS)
-
-pygame.quit()
-sys.exit()
