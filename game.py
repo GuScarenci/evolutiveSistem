@@ -17,9 +17,9 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
-path_img = pygame.image.load("track.png")  # Replace with your path image
+path_img = pygame.image.load("assets/track.png")  # Replace with your path image
 path_img = pygame.transform.scale(path_img, (WIDTH, HEIGHT))  # Scale to fit screen
-car_img  = pygame.image.load("car.png")
+car_img  = pygame.image.load("assets/car.png")
 car_img  = pygame.transform.scale(car_img, (30, 30))
 
 

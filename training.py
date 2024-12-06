@@ -18,7 +18,7 @@ HIDDEN_LAYER_SIZE = 8
 CHECKPOINT = 102
 
 # Load checkpoints
-with open("checkpoints.json", "r") as file:
+with open("assets/checkpoints.json", "r") as file:
     checkpoints = json.load(file)
 
 pygame.init()
@@ -122,7 +122,7 @@ previous_generation_best_fitness = 0
 best_fitness = 0
 generations_since_new_best = 0
 
-trackColored  = pygame.image.load("trackColored.png")
+trackColored  = pygame.image.load("assets/trackColored.png")
 trackColored  = pygame.transform.scale(trackColored, (1920, 1080))
 
 while running:
@@ -137,7 +137,7 @@ while running:
     if keys[pygame.K_s]:
         #get best perceptron from population
         best_perceptron = max(population, key=lambda ind: ind["car"].fitness)["perceptron"]
-        file_name = f"perceptron_{generation}.json"
+        file_name = f"assets/models/perceptron_{generation}.json"
         best_perceptron.save_perceptron(file_name)
         print(f"Best perceptron saved to {file_name}")
 
