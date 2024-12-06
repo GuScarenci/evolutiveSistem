@@ -8,8 +8,8 @@ from perceptron import Perceptron
 
 # Genetic Algorithm HYPERPARAMETERS
 POPULATION_SIZE = 50
-MUTATION_RATE = 0.25
-MUTATION_MODULUS = 1
+MUTATION_RATE = 0.1
+MUTATION_MODULUS = 0.8
 GENERATIONS = 1000
 BREEDING_NUM = 5
 TOP_SCORES_TO_CONSERVE = 35
@@ -49,10 +49,9 @@ previous_population = [
 
 generation = 1
 
-goldPerceptron = Perceptron(input_size=6, hidden_size=6, output_size=2)
-goldPerceptron.load_perceptron("safe_perceptron.npz")
-
-population[0]["perceptron"] = goldPerceptron
+#goldPerceptron = Perceptron(input_size=6, hidden_size=6, output_size=2)
+#goldPerceptron.load_perceptron("safe_perceptron.npz")
+#population[0]["perceptron"] = goldPerceptron
 
 def evaluate_population():
     """Evaluate the fitness of each car in the population."""
