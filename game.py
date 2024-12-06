@@ -39,9 +39,9 @@ class Car:
         self.acceleration = 0.05
         self.deceleration = 0.1
         self.hitbox = (25, 20)
-        self.max_frames_to_reach_checkpoint = 100
+        self.max_frames_to_reach_checkpoint = 70
         #angle tuple: (angle_offset, max_distance)
-        self.ray_angles = [(-90, 110), (-45, 110), (0, 110), (45, 110), (90, 110), (180, 100)]
+        self.ray_angles = [(-90, 110), (-45, 110), (0, 150), (45, 110), (90, 110), (180, 30)]
         self.max_laps_in_training = 2
 
         self.max_score = 0
@@ -217,7 +217,7 @@ class Car:
         Creates a deep copy of the Car instance.
         """
         new_car = Car(
-            checkpoint_=self.start_checkpoint,
+            checkpoint_=self.start_checkpoint + 1,
             checkpoints=self.checkpoints,
             angle=self.start_angle,
             speed=self.start_speed,
