@@ -10,19 +10,10 @@ This program implements a top-down racing simulator where cars controlled by neu
 ### Setup
 - Clone the repository
 - In order to run this software you will need Python 3.12.3 or later.
-- Install the required packages by running the following command:
-```bash
-pip install virtualenv
-```
-- Create a virtual environment by running the following command:
-```bash
-python -m venv .venv
-```
-Install the required packages by running the following command:
+- Install the required packages by running the following command (strongly recommended to use a virtual environment):
 ```bash
 pip install --no-index --find-links=packages -r requirements.txt
 ```
-
 - Run the script.
 
 ### Authors
