@@ -105,8 +105,10 @@ def breed_population():
     decimate_population = breeds_since_new_best > 3
     for _ in range(TOP_SCORES_TO_CONSERVE + 1, POPULATION_SIZE):
         if decimate_population:
+            new_perceptron = Perceptron(input_size=PERCEPTRON_INPUT_SIZE, hidden_size=HIDDEN_LAYER_SIZE, output_size=2)
+            child_perceptron = Perceptron.crossover(best_perceptron, new_perceptron)
             new_population.append({
-                "perceptron": Perceptron(input_size=PERCEPTRON_INPUT_SIZE, hidden_size=HIDDEN_LAYER_SIZE, output_size=2),
+                "perceptron": child_perceptron,
                 "car": Car(CHECKPOINT, checkpoints, color=RED)
             })
         else:
