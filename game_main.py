@@ -7,7 +7,7 @@ from game import *
 import json
 import numpy as np
 
-with open("checkpoints.json", "r") as file:
+with open("assets/checkpoints.json", "r") as file:
     checkpoints = json.load(file)
 
 pygame.init()
@@ -18,13 +18,16 @@ running = True
 playerCar = Car(102, checkpoints, training_mode=False)
 aiCar = Car(102, checkpoints, color=RED, training_mode=False)
 aiPerceptron = Perceptron(input_size=6, hidden_size=6, output_size=2)
-aiPerceptron.load_perceptron("safe_perceptron.npz")
+aiPerceptron.load_perceptron("assets/safe_perceptron.npz")
 
 cars = [playerCar, aiCar]
 
+trackColored  = pygame.image.load("assets/trackColored.png")
+trackColored  = pygame.transform.scale(trackColored, (1920, 1080))
+
 while running:
     screen.fill(BLACK)
-    screen.blit(path_img, (0, 0))
+    screen.blit(trackColored, (0, 0))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

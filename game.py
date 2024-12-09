@@ -17,9 +17,9 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
-path_img = pygame.image.load("track.png")  # Replace with your path image
+path_img = pygame.image.load("assets/track.png")  # Replace with your path image
 path_img = pygame.transform.scale(path_img, (WIDTH, HEIGHT))  # Scale to fit screen
-car_img  = pygame.image.load("car.png")
+car_img  = pygame.image.load("assets/car.png")
 car_img  = pygame.transform.scale(car_img, (30, 30))
 
 
@@ -39,9 +39,9 @@ class Car:
         self.acceleration = 0.05
         self.deceleration = 0.1
         self.hitbox = (25, 20)
-        self.max_frames_to_reach_checkpoint = 100
+        self.max_frames_to_reach_checkpoint = 70
         #angle tuple: (angle_offset, max_distance)
-        self.ray_angles = [(-90, 110), (-45, 210), (0, 200), (45, 210), (90, 110), (180, 100)]
+        self.ray_angles = [(-90, 110), (-45, 110), (0, 150), (45, 110), (90, 110), (180, 30)]
         self.max_laps_in_training = 2
 
         self.max_score = 0
@@ -61,7 +61,6 @@ class Car:
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
         self.fitness = 0
-        self.speed_integral = 0
         self.time_alive = 0
         self.checkpoints_reached = 0
         self.lap_time = 0
@@ -110,10 +109,9 @@ class Car:
 
         self.frames_since_last_checkpoint += 1
         self.time_alive += 1
-        self.speed_integral += self.speed
         self.lap_time += 1
 
-        self.fitness = self.checkpoints_reached*500 + (self.speed_integral) * 50
+        self.fitness = self.checkpoints_reached * 500
 
         timeout = False
         race_done = False
@@ -121,9 +119,7 @@ class Car:
             timeout = self.frames_since_last_checkpoint > self.max_frames_to_reach_checkpoint
             race_done = self.lap_count >= self.max_laps_in_training
             if race_done:
-                self.fitness = (self.checkpoints_reached * 500 
-                                + 1/(self.time_alive) * self.max_laps_in_training * 200 * self.checkpoints_reached
-                                + (self.speed_integral) * 50)
+                self.fitness = 500 * (self.checkpoints_reached + 10 * self.checkpoints_reached/(self.time_alive/60))
 
         if not self.is_on_path() or timeout or race_done:
             self.die()
@@ -221,7 +217,7 @@ class Car:
         Creates a deep copy of the Car instance.
         """
         new_car = Car(
-            checkpoint_=self.start_checkpoint,
+            checkpoint_=self.start_checkpoint + 1,
             checkpoints=self.checkpoints,
             angle=self.start_angle,
             speed=self.start_speed,
