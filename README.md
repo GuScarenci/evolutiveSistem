@@ -1,5 +1,5 @@
 # Evolutive Car Racing!
-A video with demonstration and explanation is show [here](https://youtu.be/P_O1a81Bg1I?si=RuWM24tXJOjyFw7s).
+A video with demonstration and explanation is shown [here](https://youtu.be/P_O1a81Bg1I?si=RuWM24tXJOjyFw7s).
 [![Illustration of the game](./assets/documentation/firstPage.png)](https://youtu.be/P_O1a81Bg1I?si=RuWM24tXJOjyFw7s)
 
 ### Introduction
