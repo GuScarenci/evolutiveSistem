@@ -1,11 +1,12 @@
 # Evolutive Car Racing!
-![Illustration of the game](./assets/documentation/firstPage.png)
+A video with demonstration and explanation is show [here](https://youtu.be/P_O1a81Bg1I?si=RuWM24tXJOjyFw7s).
+![[Illustration of the game](./assets/documentation/firstPage.png)](https://youtu.be/P_O1a81Bg1I?si=RuWM24tXJOjyFw7s)
 
 ### Introduction
 This program implements a top-down racing simulator where cars controlled by neural networks, perceptron, compete on a track. It uses genetic algorithms to evolve each car's drivers, allowing them to learn to efficiently navigate the route over multiple generations. Each car is equipped with simulated sensors that provide information about the environment, such as driving distances, and uses these inputs to make decisions about steering, acceleration and braking. The simulation offers an interactive visualization of learning progress, with all cars in the population being simulated and evaluated simultaneously, making the program ideal for exploring concepts of artificial, reinforcement learning and evolutionary intelligence.
 
 ### Demonstration
-![Illustration of the game](./assets/documentation/illustration.png)
+![[Illustration of the game](./assets/documentation/illustration.png)](https://youtu.be/P_O1a81Bg1I?si=RuWM24tXJOjyFw7s)
 
 ### Setup
 - Clone the repository
