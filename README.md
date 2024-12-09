@@ -21,7 +21,7 @@ pip install numpy
 ```bash
 pip install opencv-python
 ```
-- Run the scripts, 'training.py' if you want to see the cars learning to drive and 'game_main.py' if you want to play the game against the best trained car.
+- Run the scripts, `training.py` if you want to see the cars learning to drive and `game_main.py` if you want to play the game against the best trained car.
 
 ### Authors
 - Gabriel Franceschi Libardi. NUSP: 11760739
