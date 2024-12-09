@@ -11,11 +11,17 @@ This program implements a top-down racing simulator where cars controlled by neu
 ### Setup
 - Clone the repository
 - In order to run this software you will need Python 3.12.3 or later.
-- Install the required packages by running the following command (strongly recommended to use a virtual environment):
+- Install the required packages by running the following commands (strongly recommended to use a virtual environment):
 ```bash
-pip install --no-index --find-links=packages -r requirements.txt
+pip install pygame
 ```
-- Run the script.
+```bash
+pip install numpy
+```
+```bash
+pip install opencv-python
+```
+- Run the scripts, 'training.py' if you want to see the cars learning to drive and 'game_main.py' if you want to play the game against the best trained car.
 
 ### Authors
 - Gabriel Franceschi Libardi. NUSP: 11760739
